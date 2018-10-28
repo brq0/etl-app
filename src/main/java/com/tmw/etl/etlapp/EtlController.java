@@ -3,6 +3,7 @@ package com.tmw.etl.etlapp;
 import com.tmw.etl.etlapp.db.EtlService;
 import com.tmw.etl.etlapp.db.entities.OutputEntity;
 import com.tmw.etl.etlapp.db.repositories.OutputRepository;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
@@ -27,7 +29,7 @@ public class EtlController {
     private EtlService etlService;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private String rawData = null;
+    private ArrayList<Document> rawData = null;
     private String transferredData = null;
 
     @GetMapping("/extract")
@@ -48,7 +50,7 @@ public class EtlController {
                 return new ResponseEntity<>("TRANSFER", HttpStatus.CONFLICT);
             }
         } else {
-            transferredData = etlService.transferData(rawData);
+//            transferredData = etlService.transferData(rawData);
             return new ResponseEntity<>("TRANSFER", HttpStatus.OK);
         }
     }
