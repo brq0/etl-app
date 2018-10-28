@@ -78,8 +78,8 @@ public class EtlController {
     }
 
 
-    @GetMapping("/txt")
-    public ResponseEntity<Optional<OutputEntity>> txtResponse(HttpServletResponse response, @RequestParam(required = true) String rowId){
+    @GetMapping("/generateTxt")
+    public ResponseEntity<Optional<OutputEntity>> generateTxt(HttpServletResponse response, @RequestParam(required = true) String rowId){
         logger.debug("ROW ID:" + rowId);
         String fileName = "record.txt";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
@@ -90,4 +90,16 @@ public class EtlController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
+
+    @GetMapping("generateCsv")
+    public ResponseEntity<String> generateCsv(HttpServletResponse response){
+        String fileName = "records.csv";
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        String output = "id,name,description" + System.lineSeparator();
+        for(OutputEntity x : outputRepository.findAll()){
+            output += x.toString() + System.lineSeparator();
+        }
+        return new ResponseEntity<>(output, HttpStatus.OK);
+    }
+
 }
