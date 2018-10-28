@@ -3,6 +3,7 @@ package com.tmw.etl.etlapp;
 import com.tmw.etl.etlapp.db.EtlService;
 import com.tmw.etl.etlapp.db.entities.OutputEntity;
 import com.tmw.etl.etlapp.db.repositories.OutputRepository;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -28,13 +33,29 @@ public class EtlController {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private String rawData = null;
+
+    private Document rawDataDoc = null;
     private String transferredData = null;
+
+    private DataExtractor dataExtractor = null;
+
+    private Future<Document> documentFuture = null;
 
     @GetMapping("/extract")
     public ResponseEntity<String> extract() {
-        rawData = etlService.getData();
-
-        return new ResponseEntity<>("EXTRACT", HttpStatus.OK);
+        if(documentFuture == null){
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            documentFuture = executorService.submit(new DataExtractor());
+        }else if(documentFuture.isDone()){
+            try{
+                rawDataDoc = documentFuture.get();
+            }catch (InterruptedException | ExecutionException ex){
+                logger.error("ERROR EXTRACTING DATA");
+            }
+            documentFuture = null;
+            return new ResponseEntity<>("DATA EXTRACTED", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("EXTRACTing", HttpStatus.OK);
     }
 
     @GetMapping("/transfer")
