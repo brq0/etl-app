@@ -10,7 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -71,5 +75,19 @@ public class EtlController {
     @GetMapping("getData")
     public ResponseEntity<Iterable<OutputEntity>> getData() {
         return new ResponseEntity<>(outputRepository.findAll(), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/txt")
+    public ResponseEntity<Optional<OutputEntity>> txtResponse(HttpServletResponse response, @RequestParam(required = true) String rowId){
+        logger.debug("ROW ID:" + rowId);
+        String fileName = "record.txt";
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        try {
+            Optional<OutputEntity> content = outputRepository.findById(Integer.parseInt(rowId));
+            return new ResponseEntity<>(content, HttpStatus.OK);
+        }catch (NumberFormatException exc){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
     }
 }
