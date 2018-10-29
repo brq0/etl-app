@@ -102,7 +102,5 @@ public class EtlService {
             gameRepository.save(game);
         }
 
-
-
     }
 }
