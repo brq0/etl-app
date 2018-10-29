@@ -2,8 +2,8 @@ package com.tmw.etl.etlapp.db.entities;
 
 import javax.persistence.*;
 
-@Entity(name = "Game")
-@Table(name = "Games")
+@Entity(name = "etlapp")
+@Table(name = "games")
 public class Game {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

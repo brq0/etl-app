@@ -1,19 +1,26 @@
 package com.tmw.etl.etlapp.db;
 
 import com.tmw.etl.etlapp.db.entities.Game;
+import com.tmw.etl.etlapp.db.repositories.GameRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Service
 public class EtlService {
+
+    @Autowired
+    private GameRepository gameRepository;
+
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public ArrayList<Document> getData() {
@@ -49,7 +56,7 @@ public class EtlService {
     }
 
     public ArrayList<Game> transformData(ArrayList<Document> htmlAllPages) {
-        logger.info("TRANSFERING DATA");
+        logger.info("TRANSFORMING DATA");
 
         ArrayList<Game> games = new ArrayList<>();
 
@@ -87,8 +94,15 @@ public class EtlService {
         return games;
     }
 
-    public void loadData(ArrayList<Game> transferredData) {
+    public void loadData(ArrayList<Game> transofmedData) {
         logger.info("LOADING DATA");
-        logger.info("LOADED DATA: " + transferredData);
+        logger.info("LOADED DATA: " + transofmedData);
+
+        for (Game game : transofmedData) {
+            gameRepository.save(game);
+        }
+
+
+
     }
 }
