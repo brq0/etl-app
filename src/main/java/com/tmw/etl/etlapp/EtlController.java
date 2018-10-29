@@ -36,59 +36,79 @@ public class EtlController {
     private ArrayList<Document> rawData = null;
     private ArrayList<Game> transformedData = null;
 
-    private DataExtractor dataExtractor = null;
-
-    private Future<Document> documentFuture = null;
+    private Future<ArrayList<Document>> documentFuture = null;
+    private Future<ArrayList<Game>> gameFuture = null;
+    private DataLoader dataLoader = null;
 
     @GetMapping("/extract")
     public ResponseEntity<String> extract() {
-        if(documentFuture == null){
+        if (documentFuture == null) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             documentFuture = executorService.submit(new DataExtractor());
-        }else if(documentFuture.isDone()){
-            try{
+            executorService.shutdown();
+        } else if (documentFuture.isDone()) {
+            try {
                 rawData = documentFuture.get();
-            }catch (InterruptedException | ExecutionException ex){
-                logger.error("ERROR EXTRACTING DATA");
+            } catch (InterruptedException | ExecutionException ex) {
+                logger.error("Error extracting data");
+                return new ResponseEntity<>("Error extracting data.", HttpStatus.CONFLICT);
             }
             documentFuture = null;
-            return new ResponseEntity<>("DATA EXTRACTED", HttpStatus.OK);
+            return new ResponseEntity<>("Data extracted successfully.", HttpStatus.OK);
         }
-        return new ResponseEntity<>("EXTRACTing", HttpStatus.OK);
+        return new ResponseEntity<>("Data is being extracted..", HttpStatus.OK);
     }
 
     @GetMapping("/transform")
     public ResponseEntity<String> transform() {
         logger.debug("DATA: " + rawData);
-        if (rawData == null) {
+        if (rawData != null) {
+            if (gameFuture == null) {
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                gameFuture = executorService.submit(new DataTransformer(rawData));
+                executorService.shutdown();
+            } else if (gameFuture.isDone()) {
+                try {
+                    transformedData = gameFuture.get();
+                } catch (InterruptedException | ExecutionException ex) {
+                    logger.error("Error transforming data.");
+                    return new ResponseEntity<>("Error transforming data.", HttpStatus.CONFLICT);
+                }
+                gameFuture = null;
+                return new ResponseEntity<>("Data transformed successfully.", HttpStatus.OK);
+            }
+            return new ResponseEntity<>("Data is being transformed..", HttpStatus.OK);
+        } else {
             try {
-                throw new NoDataException("There is no data to transform.");
+                throw new NoDataException("There is no data to transform. Extract data in the first place.");
             } catch (NoDataException exc) {
                 logger.error(exc.getMessage());
-                return new ResponseEntity<>("TRANSFORM", HttpStatus.CONFLICT);
+                return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
-        } else {
-            transformedData = etlService.transformData(rawData);
-            return new ResponseEntity<>("TRANSFORM", HttpStatus.OK);
         }
     }
 
     @GetMapping("/load")
     public ResponseEntity<String> load() {
         logger.debug("DATA: " + transformedData);
-        if (transformedData == null) {
+        if(transformedData != null){
+
+            if(dataLoader != null && !dataLoader.getThread().isAlive()){
+                transformedData = null;
+                rawData = null;
+                dataLoader = null;
+                return new ResponseEntity<>("Data loaded successfully.", HttpStatus.OK);
+            }else{
+                dataLoader = new DataLoader(transformedData, gameRepository);
+                return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);
+            }
+        }else{
             try {
-                throw new NoDataException("There is no data or data was not transferred.");
+                throw new NoDataException("There is no data or data was not transformed. Extract data or transform it in the first place.");
             } catch (NoDataException exc) {
                 logger.error(exc.getMessage());
-                return new ResponseEntity<>("Failed Loading", HttpStatus.CONFLICT);
+                return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
-        } else {
-            etlService.loadData(transformedData);
-
-            transformedData = null;
-            rawData = null;
-            return new ResponseEntity<>("LOAD", HttpStatus.OK);
         }
     }
 
@@ -99,24 +119,24 @@ public class EtlController {
 
 
     @GetMapping("/generateTxt")
-    public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, @RequestParam(required = true) String rowId){
+    public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, @RequestParam(required = true) String rowId) {
         logger.debug("ROW ID:" + rowId);
         String fileName = "record.txt";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
         try {
             Optional<Game> content = gameRepository.findById(Integer.parseInt(rowId));
             return new ResponseEntity<>(content, HttpStatus.OK);
-        }catch (NumberFormatException exc){
+        } catch (NumberFormatException exc) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
     }
 
     @GetMapping("generateCsv")
-    public ResponseEntity<String> generateCsv(HttpServletResponse response){
+    public ResponseEntity<String> generateCsv(HttpServletResponse response) {
         String fileName = "records.csv";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        String output = "id,name,description" + System.lineSeparator();
-        for(Game x : gameRepository.findAll()){
+        String output = "id,name,category,price,img_url" + System.lineSeparator();
+        for (Game x : gameRepository.findAll()) {
             output += x.toString() + System.lineSeparator();
         }
         return new ResponseEntity<>(output, HttpStatus.OK);

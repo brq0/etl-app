@@ -1,6 +1,8 @@
 package com.tmw.etl.etlapp.db.entities;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity(name = "games")
 @Table(name = "games")
@@ -54,12 +56,6 @@ public class Game {
 
     @Override
     public String toString() {
-        return "Game{" +
-                "productId='" + productId + '\'' +
-                ", productName='" + productName + '\'' +
-                ", productCategory='" + productCategory + '\'' +
-                ", productPrice='" + productPrice + '\'' +
-                ", productImageUrl='" + productImageUrl + '\'' +
-                '}';
+        return productId + ',' + productName + ',' + productCategory + ',' + productPrice + ',' + productImageUrl;
     }
 }
