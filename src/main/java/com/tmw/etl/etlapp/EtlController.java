@@ -91,18 +91,17 @@ public class EtlController {
     @GetMapping("/load")
     public ResponseEntity<String> load() {
         logger.debug("DATA: " + transformedData);
-        if(transformedData != null){
-
-            if(dataLoader != null && !dataLoader.getThread().isAlive()){
+        if (transformedData != null) {
+            if (dataLoader != null && !dataLoader.getThread().isAlive()) {
                 transformedData = null;
                 rawData = null;
                 dataLoader = null;
                 return new ResponseEntity<>("Data loaded successfully.", HttpStatus.OK);
-            }else{
+            } else if (dataLoader == null) {
                 dataLoader = new DataLoader(transformedData, gameRepository);
-                return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);
             }
-        }else{
+            return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);
+        } else {
             try {
                 throw new NoDataException("There is no data or data was not transformed. Extract data or transform it in the first place.");
             } catch (NoDataException exc) {
@@ -119,12 +118,12 @@ public class EtlController {
 
 
     @GetMapping("/generateTxt")
-    public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, @RequestParam(required = true) String rowId) {
-        logger.debug("ROW ID:" + rowId);
+    public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, @RequestParam(required = true) String id) {
+        logger.debug("ROW ID:" + id);
         String fileName = "record.txt";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
         try {
-            Optional<Game> content = gameRepository.findById(Integer.parseInt(rowId));
+            Optional<Game> content = gameRepository.findById(id);
             return new ResponseEntity<>(content, HttpStatus.OK);
         } catch (NumberFormatException exc) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
