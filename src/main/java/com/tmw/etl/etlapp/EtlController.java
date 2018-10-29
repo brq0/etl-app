@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
@@ -32,10 +36,25 @@ public class EtlController {
     private ArrayList<Document> rawData = null;
     private ArrayList<Game> transformedData = null;
 
+    private DataExtractor dataExtractor = null;
+
+    private Future<Document> documentFuture = null;
+
     @GetMapping("/extract")
     public ResponseEntity<String> extract() {
-        rawData = etlService.getData();
-        return new ResponseEntity<>("EXTRACT", HttpStatus.OK);
+        if(documentFuture == null){
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            documentFuture = executorService.submit(new DataExtractor());
+        }else if(documentFuture.isDone()){
+            try{
+                rawData = documentFuture.get();
+            }catch (InterruptedException | ExecutionException ex){
+                logger.error("ERROR EXTRACTING DATA");
+            }
+            documentFuture = null;
+            return new ResponseEntity<>("DATA EXTRACTED", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("EXTRACTing", HttpStatus.OK);
     }
 
     @GetMapping("/transform")
