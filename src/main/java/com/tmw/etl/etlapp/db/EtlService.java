@@ -1,5 +1,6 @@
 package com.tmw.etl.etlapp.db;
 
+import com.tmw.etl.etlapp.db.entities.Game;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -8,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.print.Doc;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -18,7 +18,9 @@ public class EtlService {
 
     public ArrayList<Document> getData() {
         logger.info("GETTING DATA");
+
         ArrayList<Document> docsByPages = new ArrayList<>();
+
         try{
 
             for(int i = 1; ; i += 60){
@@ -41,19 +43,51 @@ public class EtlService {
             e.printStackTrace();
         }
 
-        System.out.println(docsByPages.size()); // CHECK IF THERE 7 PAGES
+        logger.info("" + docsByPages.size()); // CHECK IF THERE 7 PAGES
 
         return docsByPages;
     }
 
-    public String transferData(String data) {
-        logger.info("DATA: " + data);
+    public ArrayList<Game> transformData(ArrayList<Document> htmlAllPages) {
         logger.info("TRANSFERING DATA");
 
-        return "AFTER TRANSFER --- " + data;
+        ArrayList<Game> games = new ArrayList<>();
+
+
+        for (Document doc : htmlAllPages ){
+
+            Elements elements = doc.getElementsByClass("js-reco-product");
+
+            for (Element element : elements) {
+                Game game = new Game();
+
+                String productId = element.attr("data-product-id");
+                String productName = element.attr("data-product-name");
+                String productCategory = element.attr("data-product-category");
+                String productPrice = element.getElementsByClass("price").text();
+                String productImageUrl = element.getElementsByClass("lazy").attr("lazy-img");
+
+                if (productPrice.equals("")) {
+                    productPrice = "product unvailable";
+                }
+
+                logger.info("PRODUCT ID: " + productId + " *** PRODUCT NAME: " + productName + " *** PRODUCT CATEGORY: " + productCategory + " *** PRICE: " + productPrice + " \nIMAGE URL: " + productImageUrl);
+
+                game.setProductId(productId);
+                game.setProductName(productName);
+                game.setProductCategory(productCategory);
+                game.setProductPrice(productPrice);
+                game.setProductImageUrl(productImageUrl);
+
+                games.add(game);
+            }
+
+        }
+
+        return games;
     }
 
-    public void loadData(String transferredData) {
+    public void loadData(ArrayList<Game> transferredData) {
         logger.info("LOADING DATA");
         logger.info("LOADED DATA: " + transferredData);
     }

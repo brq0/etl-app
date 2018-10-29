@@ -1,7 +1,8 @@
 package com.tmw.etl.etlapp.db.repositories;
 
-import com.tmw.etl.etlapp.db.entities.OutputEntity;
+import com.tmw.etl.etlapp.db.entities.Game;
 import org.springframework.data.repository.CrudRepository;
 
-public interface OutputRepository extends CrudRepository<OutputEntity, Integer> {
+public interface OutputRepository extends CrudRepository<Game, Integer> {
+
 }
