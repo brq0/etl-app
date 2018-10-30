@@ -150,4 +150,10 @@ public class EtlController {
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
+    @GetMapping("restartDb")
+    public ResponseEntity<String> restartDb() {
+        gameRepository.restartDb();
+        return new ResponseEntity<>("DbRestarted", HttpStatus.OK);
+    }
+
 }
