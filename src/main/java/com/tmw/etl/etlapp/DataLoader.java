@@ -6,33 +6,35 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
-public class DataLoader implements Runnable {
+public class DataLoader implements Callable<Integer> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private ArrayList<Game> transferredData;
-    private Thread thrd;
     private GameRepository gameRepository;
 
     public DataLoader(ArrayList<Game> transferredData, GameRepository gameRepository) {
         this.transferredData = transferredData;
         this.gameRepository = gameRepository;
-        thrd = new Thread(this);
-        thrd.start();
     }
 
-    public Thread getThread(){
-        return thrd;
-    }
 
     @Override
-    public void run(){
-        loadData();
+    public Integer call(){
+        return loadData();
     }
 
-    private void loadData() {
+    private Integer loadData() {
         logger.info("LOADING DATA");
+        Integer counter = 0;
         for (Game game : transferredData) {
-            gameRepository.save(game);
+
+            if(gameRepository.findById(game.getProductId()) != null) {
+                gameRepository.save(game);
+                counter++;
+            }
+            logger.info(game.toString());
         }
+        return counter;
     }
 }

@@ -38,7 +38,7 @@ public class EtlController {
 
     private Future<ArrayList<Document>> documentFuture = null;
     private Future<ArrayList<Game>> gameFuture = null;
-    private DataLoader dataLoader = null;
+    private Future<Integer> loadFuture = null;
 
     @GetMapping("/extract")
     public ResponseEntity<String> extract() {
@@ -92,13 +92,22 @@ public class EtlController {
     public ResponseEntity<String> load() {
         logger.debug("DATA: " + transformedData);
         if (transformedData != null) {
-            if (dataLoader != null && !dataLoader.getThread().isAlive()) {
+            if (loadFuture != null && loadFuture.isDone()) {
                 transformedData = null;
                 rawData = null;
-                dataLoader = null;
-                return new ResponseEntity<>("Data loaded successfully.", HttpStatus.OK);
-            } else if (dataLoader == null) {
-                dataLoader = new DataLoader(transformedData, gameRepository);
+                loadFuture = null;
+                Integer counter = 0;
+                try {
+                    counter = loadFuture.get();
+                }catch (InterruptedException | ExecutionException ex){
+                    logger.error("Error loading data.");
+                    return new ResponseEntity<>("Error loading data.", HttpStatus.CONFLICT);
+                }
+                return new ResponseEntity<>("Data loaded successfully. Inserted: " + counter + " rows.", HttpStatus.OK);
+            } else if (loadFuture == null) {
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository));
+                executorService.shutdown();
             }
             return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);
         } else {
