@@ -93,16 +93,16 @@ public class EtlController {
         logger.debug("DATA: " + transformedData);
         if (transformedData != null) {
             if (loadFuture != null && loadFuture.isDone()) {
-                transformedData = null;
-                rawData = null;
-                loadFuture = null;
                 Integer counter = 0;
                 try {
                     counter = loadFuture.get();
-                }catch (InterruptedException | ExecutionException ex){
+                } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error loading data.");
                     return new ResponseEntity<>("Error loading data.", HttpStatus.CONFLICT);
                 }
+                transformedData = null;
+                rawData = null;
+                loadFuture = null;
                 return new ResponseEntity<>("Data loaded successfully. Inserted: " + counter + " rows.", HttpStatus.OK);
             } else if (loadFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();

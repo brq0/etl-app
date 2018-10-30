@@ -20,7 +20,7 @@ public class DataLoader implements Callable<Integer> {
 
 
     @Override
-    public Integer call(){
+    public Integer call() {
         return loadData();
     }
 
@@ -28,12 +28,11 @@ public class DataLoader implements Callable<Integer> {
         logger.info("LOADING DATA");
         Integer counter = 0;
         for (Game game : transferredData) {
-
-            if(gameRepository.findById(game.getProductId()) != null) {
+            if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
                 gameRepository.save(game);
+                logger.debug(game.toString());
                 counter++;
             }
-            logger.info(game.toString());
         }
         return counter;
     }
