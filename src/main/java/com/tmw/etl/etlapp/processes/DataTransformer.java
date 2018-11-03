@@ -26,10 +26,8 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
     private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
         ArrayList<Game> games = new ArrayList<>();
         int position = 1;
-
         for (Document doc : rawDataPages) {
             Elements elements = doc.getElementsByClass("js-reco-product");
-
             for (Element element : elements) {
                 Game game = new Game();
 
@@ -59,7 +57,6 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
                 games.add(game);
             }
         }
-//        @TODO HANDLE NULL
         return games;
     }
 }

@@ -23,7 +23,6 @@ public class EtlProcessor implements Callable<Integer> {
         this.gameRepository = gameRepository;
     }
 
-
     @Override
     public Integer call() {
         ArrayList<Document> pagesDocs = extractData();
@@ -50,18 +49,14 @@ public class EtlProcessor implements Callable<Integer> {
         }
 
         logger.info("" + docsByPages.size()); // CHECK IF THERE 7 PAGES
-
-//        @TODO handle null
         return docsByPages;
     }
 
     private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
         ArrayList<Game> games = new ArrayList<>();
         int position = 1;
-
         for (Document doc : rawDataPages) {
             Elements elements = doc.getElementsByClass("js-reco-product");
-
             for (Element element : elements) {
                 Game game = new Game();
 
@@ -91,7 +86,6 @@ public class EtlProcessor implements Callable<Integer> {
                 games.add(game);
             }
         }
-//        @TODO HANDLE NULL
         return games;
     }
 
@@ -107,5 +101,4 @@ public class EtlProcessor implements Callable<Integer> {
         }
         return counter;
     }
-
 }
