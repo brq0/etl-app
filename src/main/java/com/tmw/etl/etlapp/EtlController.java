@@ -175,11 +175,10 @@ public class EtlController {
                 logger.error("An error encountered during full ETL process.");
                 return new ResponseEntity<>("An error encountered during full ETL process.", HttpStatus.CONFLICT);
             }
-            loadFuture = null;
+            etlProcessorFuture = null;
             return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counter + " rows.", HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Full ETL Process is running.. Please wait..", HttpStatus.OK);
         }
     }
-
 }
