@@ -118,6 +118,8 @@ public class EtlController {
                 return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
         }
+
+
     }
 
     @GetMapping("getData")
@@ -149,5 +151,10 @@ public class EtlController {
         }
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
+
+//    @GetMapping("/etl")
+//    public ResponseEntity<String> etl(){
+//
+//    }
 
 }
