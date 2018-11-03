@@ -1,38 +1,34 @@
-package com.tmw.etl.etlapp;
+package com.tmw.etl.etlapp.services;
 
-import com.tmw.etl.etlapp.db.EtlService;
 import com.tmw.etl.etlapp.db.entities.Game;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.exc.NoDataException;
+import com.tmw.etl.etlapp.processes.DataExtractor;
+import com.tmw.etl.etlapp.processes.DataLoader;
+import com.tmw.etl.etlapp.processes.DataTransformer;
+import com.tmw.etl.etlapp.processes.EtlProcessor;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-@RestController
-@CrossOrigin(origins = "http://localhost:3000")
-public class EtlController {
+@Service
+public class EtlService {
 
     @Autowired
     private GameRepository gameRepository;
 
-    @Autowired
-    private EtlService etlService;
+    private Logger logger = LoggerFactory.getLogger(EtlService.class);
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private ArrayList<Document> rawData = null;
     private ArrayList<Game> transformedData = null;
 
@@ -41,8 +37,7 @@ public class EtlController {
     private Future<Integer> loadFuture = null;
     private Future<Integer> etlProcessorFuture = null;
 
-    @GetMapping("/extract")
-    public ResponseEntity<String> extract() {
+    public ResponseEntity<String> extractData() {
         if (documentFuture == null) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             documentFuture = executorService.submit(new DataExtractor());
@@ -60,8 +55,7 @@ public class EtlController {
         return new ResponseEntity<>("Data is being extracted..", HttpStatus.OK);
     }
 
-    @GetMapping("/transform")
-    public ResponseEntity<String> transform() {
+    public ResponseEntity<String> transformData() {
         logger.debug("DATA: " + rawData);
         if (rawData != null) {
             if (gameFuture == null) {
@@ -89,8 +83,8 @@ public class EtlController {
         }
     }
 
-    @GetMapping("/load")
-    public ResponseEntity<String> load() {
+
+    public ResponseEntity<String> loadData() {
         logger.debug("DATA: " + transformedData);
         if (transformedData != null) {
             if (loadFuture != null && loadFuture.isDone()) {
@@ -119,49 +113,9 @@ public class EtlController {
                 return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
         }
-
-
     }
 
-    @GetMapping("getData")
-    public ResponseEntity<Iterable<Game>> getData() {
-        return new ResponseEntity<>(gameRepository.findAll(), HttpStatus.OK);
-    }
-
-
-    @GetMapping("/generateTxt")
-    public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, @RequestParam(required = true) String id) {
-        logger.debug("ROW ID:" + id);
-        String fileName = "record.txt";
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        try {
-            Optional<Game> content = gameRepository.findById(id);
-            return new ResponseEntity<>(content, HttpStatus.OK);
-        } catch (NumberFormatException exc) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
-    }
-
-    @GetMapping("generateCsv")
-    public ResponseEntity<String> generateCsv(HttpServletResponse response) {
-        String fileName = "records.csv";
-        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        String output = "id,name,category,price,img_url" + System.lineSeparator();
-        for (Game x : gameRepository.findAll()) {
-            output += x.toString() + System.lineSeparator();
-        }
-        return new ResponseEntity<>(output, HttpStatus.OK);
-    }
-
-
-    @GetMapping("restartDb")
-    public ResponseEntity<String> restartDb() {
-        gameRepository.restartDb();
-        return new ResponseEntity<>("DbRestarted", HttpStatus.OK);  
-    }
-  
-    @GetMapping("/etl")
-    public ResponseEntity<String> etl(){
+    public ResponseEntity<String> runFulleEtlProcess() {
         if(etlProcessorFuture == null){
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository));
