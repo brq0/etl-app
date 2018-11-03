@@ -38,7 +38,7 @@ public class DataService {
     public ResponseEntity<String> generateCsv(HttpServletResponse response) {
         String fileName = "records.csv";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        String output = "id,name,category,price,img_url" + System.lineSeparator();
+        String output = "id,name,category,price,img_url,position" + System.lineSeparator();
         for (Game x : gameRepository.findAll()) {
             output += x.toString() + System.lineSeparator();
         }

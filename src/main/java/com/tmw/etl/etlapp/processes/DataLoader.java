@@ -18,7 +18,6 @@ public class DataLoader implements Callable<Integer> {
         this.gameRepository = gameRepository;
     }
 
-
     @Override
     public Integer call() {
         return loadData();

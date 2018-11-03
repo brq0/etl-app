@@ -42,8 +42,6 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
         }
 
         logger.info("" + docsByPages.size()); // CHECK IF THERE 7 PAGES
-
-//        @TODO handle null
         return docsByPages;
     }
 }

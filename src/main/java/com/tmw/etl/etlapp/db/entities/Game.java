@@ -65,13 +65,6 @@ public class Game {
 
     @Override
     public String toString() {
-        return "Game{" +
-                "productId='" + productId + '\'' +
-                ", productName='" + productName + '\'' +
-                ", productCategory='" + productCategory + '\'' +
-                ", productPrice='" + productPrice + '\'' +
-                ", productImageUrl='" + productImageUrl + '\'' +
-                ", position=" + position +
-                '}';
+        return productId + ',' + productName + ',' + productCategory + ',' + productPrice + ',' + productImageUrl + ", " + position;
     }
 }
