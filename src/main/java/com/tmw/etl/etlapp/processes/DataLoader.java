@@ -1,4 +1,4 @@
-package com.tmw.etl.etlapp;
+package com.tmw.etl.etlapp.processes;
 
 import com.tmw.etl.etlapp.db.entities.Game;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;

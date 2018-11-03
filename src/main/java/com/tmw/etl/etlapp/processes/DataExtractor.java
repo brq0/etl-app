@@ -1,4 +1,4 @@
-package com.tmw.etl.etlapp;
+package com.tmw.etl.etlapp.processes;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,7 +29,7 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
             for (int i = 1; ; i += 60) {
                 Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s," + i + "?resultsPP=60").get();
                 doc.charset(Charset.forName("UTF-8"));
-                Boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
+                boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
 
                 if (hasElements)
                     docsByPages.add(doc);
