@@ -39,6 +39,8 @@ public class EtlController {
     private Future<ArrayList<Document>> documentFuture = null;
     private Future<ArrayList<Game>> gameFuture = null;
     private Future<Integer> loadFuture = null;
+    private Future<Integer> etlProcessorFuture = null;
+
 
     @GetMapping("/extract")
     public ResponseEntity<String> extract() {
@@ -152,9 +154,26 @@ public class EtlController {
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
-//    @GetMapping("/etl")
-//    public ResponseEntity<String> etl(){
-//
-//    }
+    @GetMapping("/etl")
+    public ResponseEntity<String> etl(){
+        if(etlProcessorFuture == null){
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+            etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository));
+            executorService.shutdown();
+        }
+        if(etlProcessorFuture != null && etlProcessorFuture.isDone()){
+            Integer counter = 0;
+            try {
+                counter = etlProcessorFuture.get();
+            } catch (InterruptedException | ExecutionException ex) {
+                logger.error("An error encountered during full ETL process.");
+                return new ResponseEntity<>("An error encountered during full ETL process.", HttpStatus.CONFLICT);
+            }
+            loadFuture = null;
+            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counter + " rows.", HttpStatus.OK);
+        }else{
+            return new ResponseEntity<>("Full ETL Process is running.. Please wait..", HttpStatus.OK);
+        }
+    }
 
 }
