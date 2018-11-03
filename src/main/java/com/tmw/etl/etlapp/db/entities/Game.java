@@ -13,6 +13,7 @@ public class Game {
     private String productCategory;
     private String productPrice;
     private String productImageUrl;
+    private Integer position;
 
     public String getProductId() {
         return productId;
@@ -54,8 +55,23 @@ public class Game {
         this.productImageUrl = productImageUrl;
     }
 
+    public Integer getPosition() {
+        return position;
+    }
+
+    public void setPosition(Integer position) {
+        this.position = position;
+    }
+
     @Override
     public String toString() {
-        return productId + ',' + productName + ',' + productCategory + ',' + productPrice + ',' + productImageUrl;
+        return "Game{" +
+                "productId='" + productId + '\'' +
+                ", productName='" + productName + '\'' +
+                ", productCategory='" + productCategory + '\'' +
+                ", productPrice='" + productPrice + '\'' +
+                ", productImageUrl='" + productImageUrl + '\'' +
+                ", position=" + position +
+                '}';
     }
 }
