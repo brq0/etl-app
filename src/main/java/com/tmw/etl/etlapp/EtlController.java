@@ -41,7 +41,6 @@ public class EtlController {
     private Future<Integer> loadFuture = null;
     private Future<Integer> etlProcessorFuture = null;
 
-
     @GetMapping("/extract")
     public ResponseEntity<String> extract() {
         if (documentFuture == null) {
@@ -154,6 +153,13 @@ public class EtlController {
         return new ResponseEntity<>(output, HttpStatus.OK);
     }
 
+
+    @GetMapping("restartDb")
+    public ResponseEntity<String> restartDb() {
+        gameRepository.restartDb();
+        return new ResponseEntity<>("DbRestarted", HttpStatus.OK);  
+    }
+  
     @GetMapping("/etl")
     public ResponseEntity<String> etl(){
         if(etlProcessorFuture == null){
