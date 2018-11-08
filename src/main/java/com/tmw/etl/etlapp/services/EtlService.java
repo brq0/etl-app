@@ -50,7 +50,8 @@ public class EtlService {
                 return new ResponseEntity<>("Error extracting data.", HttpStatus.CONFLICT);
             }
             documentFuture = null;
-            return new ResponseEntity<>("Data extracted successfully.", HttpStatus.OK);
+            return new ResponseEntity<>("Data extracted successfully. " +
+                    "Extracted " + rawData.size() + " pages of items.", HttpStatus.OK);
         }
         return new ResponseEntity<>("Data is being extracted..", HttpStatus.OK);
     }
@@ -67,10 +68,12 @@ public class EtlService {
                     transformedData = gameFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error transforming data.");
-                    return new ResponseEntity<>("Error transforming data.", HttpStatus.CONFLICT);
+                    return new ResponseEntity<>("Error transforming data. " +
+                            "", HttpStatus.CONFLICT);
                 }
                 gameFuture = null;
-                return new ResponseEntity<>("Data transformed successfully.", HttpStatus.OK);
+                return new ResponseEntity<>("Data transformed successfully. " +
+                        "Created " + transformedData.size() + " items.", HttpStatus.OK);
             }
             return new ResponseEntity<>("Data is being transformed..", HttpStatus.OK);
         } else {
