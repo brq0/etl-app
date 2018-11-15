@@ -67,4 +67,20 @@ public class Game {
     public String toString() {
         return productId + ',' + productName + ',' + productCategory + ',' + productPrice + ',' + productImageUrl + ", " + position;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+        if(obj == this) return true;
+        if(obj instanceof Game) {
+            Game game = (Game) obj;
+
+            return productName.equals(game.getProductName())
+                    && productCategory.equals(game.getProductCategory())
+                    && productPrice.equals(game.getProductPrice())
+                    && productImageUrl.equals(game.getProductImageUrl())
+                    && position.equals(game.getPosition());
+
+        }else return false;
+    }
 }
