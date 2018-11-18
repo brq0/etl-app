@@ -34,7 +34,7 @@ public class EtlService {
 
     private Future<ArrayList<Document>> documentFuture = null;
     private Future<ArrayList<Game>> gameFuture = null;
-    private Future<Integer> loadFuture = null;
+    private Future<Integer[]> loadFuture = null;
     private Future<Integer> etlProcessorFuture = null;
 
     public ResponseEntity<String> extractData() {
@@ -91,9 +91,9 @@ public class EtlService {
         logger.debug("DATA: " + transformedData);
         if (transformedData != null) {
             if (loadFuture != null && loadFuture.isDone()) {
-                Integer counter = 0;
+                Integer[] counters = {0,0};
                 try {
-                    counter = loadFuture.get();
+                    counters = loadFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error loading data.");
                     return new ResponseEntity<>("Error loading data.", HttpStatus.CONFLICT);
@@ -101,7 +101,9 @@ public class EtlService {
                 transformedData = null;
                 rawData = null;
                 loadFuture = null;
-                return new ResponseEntity<>("Data loaded successfully. Inserted: " + counter + " rows.", HttpStatus.OK);
+                return new ResponseEntity<>(
+                        "Data loaded successfully. Inserted: " + counters[0] + " rows. " +
+                              "Updated: " + counters[1] + " rows.", HttpStatus.OK);
             } else if (loadFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
                 loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository));

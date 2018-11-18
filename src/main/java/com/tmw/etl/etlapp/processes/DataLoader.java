@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-public class DataLoader implements Callable<Integer> {
+public class DataLoader implements Callable<Integer[]> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private ArrayList<Game> transferredData;
     private GameRepository gameRepository;
@@ -19,14 +19,14 @@ public class DataLoader implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() {
+    public Integer[] call() {
         return loadData();
     }
 
-    private Integer loadData() {
+    private Integer[] loadData() {
         logger.info("LOADING DATA");
-        Integer counter = 0;
-        Integer updateCounter = 0;
+        int counter = 0;
+        int updateCounter = 0;
 
         for (Game game : transferredData) {
             if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
@@ -35,24 +35,19 @@ public class DataLoader implements Callable<Integer> {
                 counter++;
             } else {
                     Game compareGame = gameRepository.findById(game.getProductId()).get();
-
-                    if (game.getProductName() != compareGame.getProductName()
-                            && game.getPosition() != compareGame.getPosition()
-                            && game.getProductCategory() != compareGame.getProductCategory()
-                            && game.getProductPrice() != compareGame.getProductPrice()
-                            && game.getProductImageUrl() != compareGame.getProductImageUrl()) {
-
-                        gameRepository.updateGame(game.getProductId(), game.getProductName(), game.getProductCategory(), game.getProductPrice(), game.getProductImageUrl(), game.getPosition());
+                    if (!game.equals(compareGame)) {
+                        gameRepository.updateGame(
+                                game.getProductId(),
+                                game.getProductName(),
+                                game.getProductCategory(),
+                                game.getProductPrice(),
+                                game.getProductImageUrl(),
+                                game.getPosition());
 
                         updateCounter++;
-
                     }
-
-
                 }
             }
-
-//        return new Integer[]{counter, updateCounter};
-        return counter;
+        return new Integer[]{counter, updateCounter};
     }
 }
