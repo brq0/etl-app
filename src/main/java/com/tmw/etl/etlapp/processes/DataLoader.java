@@ -26,13 +26,33 @@ public class DataLoader implements Callable<Integer> {
     private Integer loadData() {
         logger.info("LOADING DATA");
         Integer counter = 0;
+        Integer updateCounter = 0;
+
         for (Game game : transferredData) {
             if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
                 gameRepository.save(game);
                 logger.debug(game.toString());
                 counter++;
+            } else {
+                    Game compareGame = gameRepository.findById(game.getProductId()).get();
+
+                    if (game.getProductName() != compareGame.getProductName()
+                            && game.getPosition() != compareGame.getPosition()
+                            && game.getProductCategory() != compareGame.getProductCategory()
+                            && game.getProductPrice() != compareGame.getProductPrice()
+                            && game.getProductImageUrl() != compareGame.getProductImageUrl()) {
+
+                        gameRepository.updateGame(game.getProductId(), game.getProductName(), game.getProductCategory(), game.getProductPrice(), game.getProductImageUrl(), game.getPosition());
+
+                        updateCounter++;
+
+                    }
+
+
+                }
             }
-        }
+
+//        return new Integer[]{counter, updateCounter};
         return counter;
     }
 }
