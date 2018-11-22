@@ -38,6 +38,9 @@ public class EtlService {
     private Future<Integer> etlProcessorFuture = null;
 
     public ResponseEntity<String> extractData() {
+
+        if (transformedData != null) transformedData = null;
+
         if (documentFuture == null) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             documentFuture = executorService.submit(new DataExtractor());
