@@ -14,7 +14,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-public class EtlProcessor implements Callable<Integer> {
+public class EtlProcessor implements Callable<Integer[]> {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private GameRepository gameRepository;
@@ -24,7 +24,7 @@ public class EtlProcessor implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() {
+    public Integer[] call() {
         ArrayList<Document> pagesDocs = extractData();
         ArrayList<Game> games = transformData(pagesDocs);
         return loadData(games);
@@ -89,16 +89,31 @@ public class EtlProcessor implements Callable<Integer> {
         return games;
     }
 
-    private Integer loadData(ArrayList<Game> games) {
+    private Integer[] loadData(ArrayList<Game> games) {
         logger.info("LOADING DATA");
         Integer counter = 0;
+        Integer updateCounter = 0;
+
         for (Game game : games) {
             if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
                 gameRepository.save(game);
                 logger.debug(game.toString());
                 counter++;
+            } else {
+                Game compareGame = gameRepository.findById(game.getProductId()).get();
+                if (!game.equals(compareGame)) {
+                    gameRepository.updateGame(
+                            game.getProductId(),
+                            game.getProductName(),
+                            game.getProductCategory(),
+                            game.getProductPrice(),
+                            game.getProductImageUrl(),
+                            game.getPosition());
+
+                    updateCounter++;
+                }
             }
         }
-        return counter;
+        return new Integer[]{counter, updateCounter};
     }
 }

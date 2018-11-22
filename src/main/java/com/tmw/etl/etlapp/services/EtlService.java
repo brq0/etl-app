@@ -35,7 +35,7 @@ public class EtlService {
     private Future<ArrayList<Document>> documentFuture = null;
     private Future<ArrayList<Game>> gameFuture = null;
     private Future<Integer[]> loadFuture = null;
-    private Future<Integer> etlProcessorFuture = null;
+    private Future<Integer[]> etlProcessorFuture = null;
 
     public ResponseEntity<String> extractData() {
 
@@ -130,15 +130,15 @@ public class EtlService {
             executorService.shutdown();
         }
         if(etlProcessorFuture != null && etlProcessorFuture.isDone()){
-            Integer counter = 0;
+            Integer[] counters = {0, 0};
             try {
-                counter = etlProcessorFuture.get();
+                counters = etlProcessorFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("An error encountered during full ETL process.");
                 return new ResponseEntity<>("An error encountered during full ETL process.", HttpStatus.CONFLICT);
             }
             etlProcessorFuture = null;
-            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counter + " rows.", HttpStatus.OK);
+            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counters[0] + " rows. " + "Updated: " + counters[1] + " rows.", HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Full ETL Process is running.. Please wait..", HttpStatus.OK);
         }
