@@ -8,13 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class DataTransformer implements Callable<ArrayList<Game>> {
+public class DataTransformer implements Callable<ArrayList<Game>>{
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ArrayList<Document> rawDataPages;
+    private Map<String, ArrayList<Document>> rawDataPages;
 
-    public DataTransformer(ArrayList<Document> rawDataPages) {
+    public DataTransformer(Map<String, ArrayList<Document>> rawDataPages) {
         this.rawDataPages = rawDataPages;
     }
 
@@ -23,10 +24,14 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
         return transformData(rawDataPages);
     }
 
-    private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
+    private ArrayList<Game> transformData(Map<String, ArrayList<Document>> rawDataPages) {
         ArrayList<Game> games = new ArrayList<>();
         int position = 1;
-        for (Document doc : rawDataPages) {
+
+        ArrayList<Document> pagesDocs = rawDataPages.get("pages");
+        ArrayList<Document> gamesDocs = rawDataPages.get("games");
+
+        for (Document doc : pagesDocs) {
             Elements elements = doc.getElementsByClass("js-reco-product");
             for (Element element : elements) {
                 Game game = new Game();
@@ -46,6 +51,8 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
                 if (productName.equals("")) {
                     continue;
                 }
+
+
 
                 game.setProductId(productId);
                 game.setProductName(productName);

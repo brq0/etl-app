@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class DataExtractor implements Callable<ArrayList<Document>> {
+public class DataExtractor implements Callable< Map< String, ArrayList<Document> > > {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public DataExtractor() {
@@ -20,11 +22,11 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
     }
 
     @Override
-    public ArrayList<Document> call() {
+    public Map< String, ArrayList<Document> > call() {
         return extractData();
     }
 
-    private ArrayList<Document> extractData() {
+    private Map< String, ArrayList<Document> >  extractData() {
         ArrayList<Document> docsByPages = new ArrayList<>();
         ArrayList<Document> docsByGames = new ArrayList<>();
 
@@ -53,16 +55,17 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
                     break;
                 }
 
-
-
-
-
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        Map<String, ArrayList<Document> > docs = new HashMap<>();
+
+        docs.put("pages", docsByPages);
+        docs.put("games", docsByGames);
+
         logger.info("Extracted " + docsByPages.size() + " pages."); //
-        return docsByPages;
+        return docs;
     }
 }
