@@ -1,6 +1,7 @@
 package com.tmw.etl.etlapp.processes;
 
 import com.tmw.etl.etlapp.db.entities.Game;
+import com.tmw.etl.etlapp.db.entities.GameDetails;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -25,38 +26,41 @@ public class DataTransformer implements Callable<ArrayList<Game>>{
 
     private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
         ArrayList<Game> games = new ArrayList<>();
+
         int position = 1;
 
-        for (Document doc : rawDataPages) {
-            Elements elements = doc.getElementsByClass("js-reco-product");
-            for (Element element : elements) {
-                Game game = new Game();
+        for(Document product : rawDataPages){
 
-                String productId = element.attr("data-product-id");
-                String productName = element.attr("data-product-name");
-                String productCategory = element.attr("data-product-category");
-                String productPrice = element.getElementsByClass("price").text();
-                String productImageUrl = element.getElementsByClass("lazy").attr("lazy-img");
+            Game game = new Game();
+            GameDetails gameDetails = new GameDetails();
 
-                if (productPrice.equals("")) {
-                    productPrice = "product unvailable";
-                }
-                if (productId.equals("")) {
-                    continue;
-                }
-                if (productName.equals("")) {
-                    continue;
-                }
+            Element gameInfo = product.select("cac-quick-check[product-id]").first();
 
+            System.out.println(gameInfo);
 
+//            if(gameInfo == null) continue;
 
-                game.setId(productId);
-                game.setName(productName);
+//            String gameId = gameInfo.attr("product-id");
+//            String gameName = gameInfo.attr("product-name");
+//            String gamePrice = product.getElementsByClass("ta-price").text();
+//
+//            game.setId(gameId);
+//            game.setName(gameName);
+//
+//            gameDetails.setId(gameId);
+//            gameDetails.setName(gameName);
+//            gameDetails.setPosition(position);
+//            gameDetails.setPrice(gamePrice);
+//            gameDetails.setCategory( gameInfo.attr("product-category") );
+//            gameDetails.setImgUrl( gameInfo.attr("product-image") );
 
+      game.setId((position++)+"");
+      game.setName("test");
 
-                games.add(game);
-            }
+            games.add(game);
+
         }
+
         return games;
     }
 }

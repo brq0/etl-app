@@ -63,4 +63,16 @@ public class GameDetails {
     public void setPosition(Integer position) {
         this.position = position;
     }
+
+    @Override
+    public String toString() {
+        return "GameDetails{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", category='" + category + '\'' +
+                ", price='" + price + '\'' +
+                ", imgUrl='" + imgUrl + '\'' +
+                ", position=" + position +
+                '}';
+    }
 }
