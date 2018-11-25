@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class DataExtractor implements Callable< Map< String, ArrayList<Document> > > {
+public class DataExtractor implements Callable<ArrayList<Document>> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public DataExtractor() {
@@ -22,11 +22,11 @@ public class DataExtractor implements Callable< Map< String, ArrayList<Document>
     }
 
     @Override
-    public Map< String, ArrayList<Document> > call() {
+    public ArrayList<Document> call() {
         return extractData();
     }
 
-    private Map< String, ArrayList<Document> >  extractData() {
+    private ArrayList<Document>  extractData() {
         ArrayList<Document> docsByPages = new ArrayList<>();
         ArrayList<Document> docsByGames = new ArrayList<>();
 
@@ -48,7 +48,6 @@ public class DataExtractor implements Callable< Map< String, ArrayList<Document>
                         gameDoc.charset(Charset.forName("UTF-8"));
 
                         docsByGames.add(gameDoc);
-
                     }
 
                 }else{
@@ -60,12 +59,7 @@ public class DataExtractor implements Callable< Map< String, ArrayList<Document>
             e.printStackTrace();
         }
 
-        Map<String, ArrayList<Document> > docs = new HashMap<>();
-
-        docs.put("pages", docsByPages);
-        docs.put("games", docsByGames);
-
         logger.info("Extracted " + docsByPages.size() + " pages."); //
-        return docs;
+        return docsByGames;
     }
 }

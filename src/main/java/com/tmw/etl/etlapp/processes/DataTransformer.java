@@ -13,9 +13,9 @@ import java.util.concurrent.Callable;
 
 public class DataTransformer implements Callable<ArrayList<Game>>{
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private Map<String, ArrayList<Document>> rawDataPages;
+    private ArrayList<Document> rawDataPages;
 
-    public DataTransformer(Map<String, ArrayList<Document>> rawDataPages) {
+    public DataTransformer(ArrayList<Document> rawDataPages) {
         this.rawDataPages = rawDataPages;
     }
 
@@ -24,14 +24,11 @@ public class DataTransformer implements Callable<ArrayList<Game>>{
         return transformData(rawDataPages);
     }
 
-    private ArrayList<Game> transformData(Map<String, ArrayList<Document>> rawDataPages) {
+    private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
         ArrayList<Game> games = new ArrayList<>();
         int position = 1;
 
-        ArrayList<Document> pagesDocs = rawDataPages.get("pages");
-        ArrayList<Document> gamesDocs = rawDataPages.get("games");
-
-        for (Document doc : pagesDocs) {
+        for (Document doc : rawDataPages) {
             Elements elements = doc.getElementsByClass("js-reco-product");
             for (Element element : elements) {
                 Game game = new Game();

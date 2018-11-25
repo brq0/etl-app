@@ -30,10 +30,10 @@ public class EtlService {
 
     private Logger logger = LoggerFactory.getLogger(EtlService.class);
 
-    private Map<String, ArrayList<Document>> rawData = null;
+    private ArrayList<Document> rawData = null;
     private ArrayList<Game> transformedData = null;
 
-    private Future<Map<String, ArrayList<Document>>> documentFuture = null;
+    private Future<ArrayList<Document>> documentFuture = null;
     private Future<ArrayList<Game>> gameFuture = null;
     private Future<Integer[]> loadFuture = null;
     private Future<Integer[]> etlProcessorFuture = null;
