@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class DataTransformer implements Callable<ArrayList<Game>>{
@@ -51,12 +50,9 @@ public class DataTransformer implements Callable<ArrayList<Game>>{
 
 
 
-                game.setProductId(productId);
-                game.setProductName(productName);
-                game.setProductCategory(productCategory);
-                game.setProductPrice(productPrice);
-                game.setProductImageUrl(productImageUrl);
-                game.setPosition(position++);
+                game.setId(productId);
+                game.setName(productName);
+
 
                 games.add(game);
             }

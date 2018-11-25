@@ -24,7 +24,7 @@ public class DataService {
     }
 
     public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, String id) {
-        logger.debug("ROW ID:" + id);
+        logger.info("ROW ID:" + id);
         String fileName = "record.txt";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
         try {

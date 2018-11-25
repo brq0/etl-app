@@ -76,12 +76,8 @@ public class EtlProcessor implements Callable<Integer[]> {
                     continue;
                 }
 
-                game.setProductId(productId);
-                game.setProductName(productName);
-                game.setProductCategory(productCategory);
-                game.setProductPrice(productPrice);
-                game.setProductImageUrl(productImageUrl);
-                game.setPosition(position++);
+                game.setId(productId);
+                game.setName(productName);
 
                 games.add(game);
             }
@@ -95,20 +91,16 @@ public class EtlProcessor implements Callable<Integer[]> {
         Integer updateCounter = 0;
 
         for (Game game : games) {
-            if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
+            if (!gameRepository.findById(game.getId()).isPresent()) {         //if not in db
                 gameRepository.save(game);
                 logger.debug(game.toString());
                 counter++;
             } else {
-                Game compareGame = gameRepository.findById(game.getProductId()).get();
+                Game compareGame = gameRepository.findById(game.getId()).get();
                 if (!game.equals(compareGame)) {
                     gameRepository.updateGame(
-                            game.getProductId(),
-                            game.getProductName(),
-                            game.getProductCategory(),
-                            game.getProductPrice(),
-                            game.getProductImageUrl(),
-                            game.getPosition());
+                            game.getId(),
+                            game.getName());
 
                     updateCounter++;
                 }

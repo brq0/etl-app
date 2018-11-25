@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class DataExtractor implements Callable<ArrayList<Document>> {
@@ -33,7 +31,7 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
         try {
             for (int i = 1; ; i += 60) {
 
-                Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s," + i + "?resultsPP=60").get();
+                Document doc = Jsoup.connect("https://www.empik.com/multimedia/gry/mmo,34240204,s," + i + "?resultsPP=60").get();
                 doc.charset(Charset.forName("UTF-8"));
 
                 boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
@@ -59,7 +57,7 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
             e.printStackTrace();
         }
 
-        logger.info("Extracted " + docsByPages.size() + " pages."); //
+        logger.info("Extracted " + docsByGames.size() + " pages."); //
         return docsByGames;
     }
 }

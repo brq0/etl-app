@@ -11,18 +11,10 @@ public interface GameRepository extends CrudRepository<Game, String> {
     @Transactional
     @Modifying
     @Query("UPDATE games SET " +
-            "product_name = :name, " +
-            "product_category = :category, " +
-            "product_price = :price, " +
-            "product_image_url = :imgUrl, " +
-            "position = :position " +
+            "name = :name " +
             "WHERE product_id = :id")
     void updateGame(@Param("id") String id,
-                    @Param("name") String name,
-                    @Param("category") String category,
-                    @Param("price") String price,
-                    @Param("imgUrl") String imgUrl,
-                    @Param("position") Integer position);
+                    @Param("name") String name);
 
     @Transactional
     @Modifying

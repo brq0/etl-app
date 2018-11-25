@@ -29,20 +29,16 @@ public class DataLoader implements Callable<Integer[]> {
         int updateCounter = 0;
 
         for (Game game : transferredData) {
-            if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
+            if (!gameRepository.findById(game.getId()).isPresent()) {         //if not in db
                 gameRepository.save(game);
                 logger.debug(game.toString());
                 counter++;
             } else {
-                    Game compareGame = gameRepository.findById(game.getProductId()).get();
+                    Game compareGame = gameRepository.findById(game.getId()).get();
                     if (!game.equals(compareGame)) {
                         gameRepository.updateGame(
-                                game.getProductId(),
-                                game.getProductName(),
-                                game.getProductCategory(),
-                                game.getProductPrice(),
-                                game.getProductImageUrl(),
-                                game.getPosition());
+                                game.getId(),
+                                game.getName());
 
                         updateCounter++;
                     }
