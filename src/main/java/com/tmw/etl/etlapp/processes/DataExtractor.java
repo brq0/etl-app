@@ -7,7 +7,6 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.print.Doc;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -30,10 +29,9 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
         ArrayList<Document> docsByGames = new ArrayList<>();
 
         try {
-//            for (int i = 1; ; i += 60) {
+            for (int i = 1; ; i += 60) {
 
-//                Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s," + i + "?resultsPP=60").get();
-            Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s?resultsPP=60").get();
+                Document doc = Jsoup.connect("https://www.empik.com/multimedia/gry/mmo,34240204,s," + i + "?resultsPP=60").get();
                 doc.charset(Charset.forName("UTF-8"));
 
                 boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
@@ -44,8 +42,6 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
                     Elements gamesURL = doc.getElementsByClass("img seoImage");
 
                     for (Element game : gamesURL) {
-
-                        System.out.println(game.attr("href"));
                         Document gameDoc = Jsoup.connect("https://www.empik.com" + game.attr("href")).get();
                         gameDoc.charset(Charset.forName("UTF-8"));
 
@@ -53,10 +49,10 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
                     }
 
                 }else{
-//                    break;
+                    break;
                 }
 
-//            }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

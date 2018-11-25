@@ -3,7 +3,6 @@ package com.tmw.etl.etlapp.processes;
 import com.tmw.etl.etlapp.db.entities.Game;
 import com.tmw.etl.etlapp.db.entities.GameDetails;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
-public class DataTransformer implements Callable<ArrayList<Game>>{
+public class DataTransformer implements Callable<ArrayList<Game>> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private ArrayList<Document> rawDataPages;
 
@@ -29,14 +28,19 @@ public class DataTransformer implements Callable<ArrayList<Game>>{
 
         int position = 1;
 
-        for(Document product : rawDataPages){
+        for (Document gamePage : rawDataPages) {
 
             Game game = new Game();
             GameDetails gameDetails = new GameDetails();
 
-            Element gameInfo = product.select("cac-quick-check[product-id]").first();
+            String description = gamePage.getElementsByClass("productDescription").text();
+            String title = gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
+            String imgUrl = gamePage.getElementsByAttributeValue("property", "og:url").first().attr("content");
 
-            System.out.println(gameInfo);
+            Elements elements = gamePage.getElementsByClass("productDataTable").first().getElementsByClass("row--text row--text  attributeName");
+
+            System.out.println(title);
+            System.out.println(elements);
 
 //            if(gameInfo == null) continue;
 
@@ -54,8 +58,8 @@ public class DataTransformer implements Callable<ArrayList<Game>>{
 //            gameDetails.setCategory( gameInfo.attr("product-category") );
 //            gameDetails.setImgUrl( gameInfo.attr("product-image") );
 
-      game.setId((position++)+"");
-      game.setName("test");
+            game.setId((position++) + "");
+            game.setName("test");
 
             games.add(game);
 
