@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 
 public class DataTransformer implements Callable<ArrayList<Game>> {
@@ -41,26 +42,57 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
             String gamePrice = gamePage.getElementsByClass("ta-price").first().text();
 
 
-
             Elements elements = gamePage.getElementsByClass("productDataTable").first().getElementsByClass("row--text row--text  attributeName");
+            String producer = "";
+            String publisher = "";
+            String releaseDate = "";
 
-            String gameProducent = elements.get(1).text();
-            String gamePublisher = elements.get(2).text();
-            String gameDistributor = elements.get(3).text();
-            String releaseDate = elements.get(4).text();
+            for (Element element : elements) {
+                String[] elemDt = element.text().split(":");
 
-            System.out.println(gameId);
-            System.out.println(gameTitle);
-            System.out.println(gamePrice);
-            System.out.println(gameProducent);
-            System.out.println(gamePublisher);
-            System.out.println(gameDistributor);
-            System.out.println(releaseDate);
 
-            System.out.println();
-            System.out.println(            );
+                switch (elemDt[0]) {
+                    case "Wydawca":
+                        publisher = getTableRowContent(elemDt);
+                        break;
+                    case "Data premiery":
+                        releaseDate = getTableRowContent(elemDt);
+                        break;
+                    case "Producent":
+                        producer = getTableRowContent(elemDt);
+                        break;
+                    case "Liczba nośników":
 
-            System.out.println(elements);
+                        break;
+
+                    case "Wersja językowa":
+
+                        break;
+
+                    case "PEGI":
+
+                        break;
+                }
+            }
+
+            System.out.println(producer + " ---- " + publisher + " ---- " + releaseDate);
+
+
+//            String gameProducer = elements.get(1).text();
+//            gameProducer = getPureTextOfTableRow(gameProducer, "Producent:");
+//
+//            String gamePublisher = elements.get(2).text();
+//            gamePublisher = getPureTextOfTableRow(gamePublisher, "Wydawca:");
+//
+//            String gameDistributor = elements.get(3).text();
+//
+//            String releaseDate = elements.get(4).text();
+//            releaseDate = getPureTextOfTableRow(releaseDate, "Data premiery:");
+//
+//            System.out.println(gameId + " : " + gameTitle + " : " + gamePrice + " : " + gameProducer + " : " + gamePublisher + " : " + releaseDate);
+
+
+//            System.out.println(elements);
 
 
             game.setId(gameId);
@@ -70,7 +102,7 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
             gameDetails.setName(gameTitle);
             gameDetails.setPosition(position);
             gameDetails.setPrice(gamePrice);
-            gameDetails.setCategory( gamePage.attr("product-category") );
+            gameDetails.setCategory(gamePage.attr("product-category"));
             gameDetails.setImgUrl(gameImgUrl);
 
             game.setId((position++) + "");
@@ -81,5 +113,13 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
         }
 
         return games;
+    }
+
+    private String getTableRowContent(String[] elemDt) {
+        return String.join("", Arrays.copyOfRange(elemDt, 1, elemDt.length));
+    }
+
+    private String getPureTextOfTableRow(String row, String text) {
+        return row.substring(row.indexOf(text) + text.length()).trim();
     }
 }
