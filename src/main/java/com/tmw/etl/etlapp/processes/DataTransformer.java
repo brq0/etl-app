@@ -3,6 +3,7 @@ package com.tmw.etl.etlapp.processes;
 import com.tmw.etl.etlapp.db.entities.Game;
 import com.tmw.etl.etlapp.db.entities.GameDetails;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,30 +34,44 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
             Game game = new Game();
             GameDetails gameDetails = new GameDetails();
 
-            String description = gamePage.getElementsByClass("productDescription").text();
-            String title = gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
-            String imgUrl = gamePage.getElementsByAttributeValue("property", "og:url").first().attr("content");
+            String gameId = gamePage.getElementsByClass("js-reco-productlist").first().attr("page-product-id");
+            String gameDescription = gamePage.getElementsByClass("productDescription").text();
+            String gameTitle = gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
+            String gameImgUrl = gamePage.getElementsByAttributeValue("property", "og:url").first().attr("content");
+            String gamePrice = gamePage.getElementsByClass("ta-price").first().text();
+
+
 
             Elements elements = gamePage.getElementsByClass("productDataTable").first().getElementsByClass("row--text row--text  attributeName");
 
-            System.out.println(title);
+            String gameProducent = elements.get(1).text();
+            String gamePublisher = elements.get(2).text();
+            String gameDistributor = elements.get(3).text();
+            String releaseDate = elements.get(4).text();
+
+            System.out.println(gameId);
+            System.out.println(gameTitle);
+            System.out.println(gamePrice);
+            System.out.println(gameProducent);
+            System.out.println(gamePublisher);
+            System.out.println(gameDistributor);
+            System.out.println(releaseDate);
+
+            System.out.println();
+            System.out.println(            );
+
             System.out.println(elements);
 
-//            if(gameInfo == null) continue;
 
-//            String gameId = gameInfo.attr("product-id");
-//            String gameName = gameInfo.attr("product-name");
-//            String gamePrice = product.getElementsByClass("ta-price").text();
-//
-//            game.setId(gameId);
-//            game.setName(gameName);
-//
-//            gameDetails.setId(gameId);
-//            gameDetails.setName(gameName);
-//            gameDetails.setPosition(position);
-//            gameDetails.setPrice(gamePrice);
-//            gameDetails.setCategory( gameInfo.attr("product-category") );
-//            gameDetails.setImgUrl( gameInfo.attr("product-image") );
+            game.setId(gameId);
+            game.setName(gameTitle);
+
+            gameDetails.setId(gameId);
+            gameDetails.setName(gameTitle);
+            gameDetails.setPosition(position);
+            gameDetails.setPrice(gamePrice);
+            gameDetails.setCategory( gamePage.attr("product-category") );
+            gameDetails.setImgUrl(gameImgUrl);
 
             game.setId((position++) + "");
             game.setName("test");
