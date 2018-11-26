@@ -10,7 +10,6 @@ import javax.persistence.Table;
 public class GameDetails {
     @Id
     private String id;
-    private String name;
     private String category;
     private String price;
     private String imgUrl;
@@ -27,14 +26,6 @@ public class GameDetails {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getCategory() {
@@ -111,9 +102,9 @@ public class GameDetails {
 
     @Override
     public String toString() {
+//        @TODO wydruk jak do csv
         return "GameDetails{" +
                 "id='" + id + '\'' +
-                ", name='" + name + '\'' +
                 ", category='" + category + '\'' +
                 ", price='" + price + '\'' +
                 ", imgUrl='" + imgUrl + '\'' +
@@ -129,7 +120,8 @@ public class GameDetails {
         if(obj instanceof Game) {
             GameDetails game = (GameDetails) obj;
 
-            return name.equals(game.getName());
+//            @TODO
+            return true;
 
         }else return false;
     }

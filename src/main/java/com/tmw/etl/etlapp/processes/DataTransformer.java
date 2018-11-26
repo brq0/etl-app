@@ -80,7 +80,6 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
             game.setName(gameName);
 
             gameDetails.setId(gameId);
-            gameDetails.setName(gameName);
             gameDetails.setPosition(position);
             gameDetails.setPrice(gamePrice);
             gameDetails.setCategory(category);

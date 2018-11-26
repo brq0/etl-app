@@ -1,7 +1,6 @@
 package com.tmw.etl.etlapp.services;
 
 import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.entities.GameDetails;
 import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;
 import com.tmw.etl.etlapp.exc.NoDataException;
@@ -18,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,10 +32,10 @@ public class EtlService {
     private Logger logger = LoggerFactory.getLogger(EtlService.class);
 
     private ArrayList<Document> rawData = null;
-    private ArrayList<GameDetails> transformedData = null;
+    private ArrayList<Game> transformedData = null;
 
     private Future<ArrayList<Document>> documentFuture = null;
-    private Future<ArrayList<GameDetails>> gameFuture = null;
+    private Future<ArrayList<Game>> gameFuture = null;
     private Future<Integer[]> loadFuture = null;
     private Future<Integer[]> etlProcessorFuture = null;
 
