@@ -35,84 +35,96 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
             Game game = new Game();
             GameDetails gameDetails = new GameDetails();
 
-            String gameId = gamePage.getElementsByClass("js-reco-productlist").first().attr("page-product-id");
-            String gameDescription = gamePage.getElementsByClass("productDescription").text();
-            String gameTitle = gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
-            String gameImgUrl = gamePage.getElementsByAttributeValue("property", "og:url").first().attr("content");
-            String gamePrice = gamePage.getElementsByClass("ta-price").first().text();
+            String gameId = getGameId(gamePage);
+            String gameDescription = getGameDescription(gamePage);
+            String gameName = getGameName(gamePage);
+            String gameImgUrl = getGameImgUrl(gamePage);
+            String gamePrice = getGamePrice(gamePage);
+            String category = getGameCategory(gamePage);
 
 
-            Elements elements = gamePage.getElementsByClass("productDataTable").first().getElementsByClass("row--text row--text  attributeName");
-            String producer = "";
-            String publisher = "";
-            String releaseDate = "";
+            Elements elements = getDetailsTableElements(gamePage);
+            String gameProducer = "";
+            String gamePublisher = "";
+            String gameReleaseDate = "";
+            String gamePegiUrl = "";
 
             for (Element element : elements) {
                 String[] elemDt = element.text().split(":");
 
-
                 switch (elemDt[0]) {
                     case "Wydawca":
-                        publisher = getTableRowContent(elemDt);
+                        gamePublisher = getTableRowContent(elemDt);
                         break;
                     case "Data premiery":
-                        releaseDate = getTableRowContent(elemDt);
+                        gameReleaseDate = getTableRowContent(elemDt);
                         break;
                     case "Producent":
-                        producer = getTableRowContent(elemDt);
+                        gameProducer = getTableRowContent(elemDt);
                         break;
                     case "Liczba nośników":
 
                         break;
-
                     case "Wersja językowa":
 
                         break;
-
                     case "PEGI":
-
+                        gamePegiUrl = getGamePegiUrl(element);
                         break;
                 }
             }
 
-            System.out.println(producer + " ---- " + publisher + " ---- " + releaseDate);
-
-
-//            String gameProducer = elements.get(1).text();
-//            gameProducer = getPureTextOfTableRow(gameProducer, "Producent:");
-//
-//            String gamePublisher = elements.get(2).text();
-//            gamePublisher = getPureTextOfTableRow(gamePublisher, "Wydawca:");
-//
-//            String gameDistributor = elements.get(3).text();
-//
-//            String releaseDate = elements.get(4).text();
-//            releaseDate = getPureTextOfTableRow(releaseDate, "Data premiery:");
-//
-//            System.out.println(gameId + " : " + gameTitle + " : " + gamePrice + " : " + gameProducer + " : " + gamePublisher + " : " + releaseDate);
-
-
-//            System.out.println(elements);
-
+            System.out.println(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " +  gamePrice + " --- " + category + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gamePublisher + " ---- " + gameReleaseDate);
 
             game.setId(gameId);
-            game.setName(gameTitle);
+            game.setName(gameName);
 
             gameDetails.setId(gameId);
-            gameDetails.setName(gameTitle);
+            gameDetails.setName(gameName);
             gameDetails.setPosition(position);
             gameDetails.setPrice(gamePrice);
-            gameDetails.setCategory(gamePage.attr("product-category"));
+            gameDetails.setCategory(category);
             gameDetails.setImgUrl(gameImgUrl);
 
-            game.setId((position++) + "");
-            game.setName("test");
-
             games.add(game);
-
         }
 
         return games;
+    }
+
+    private String getGamePegiUrl(Element element) {
+        return "https://www.empik.com" + element.getElementsByClass("pegiCode").first()
+                .getElementsByTag("img").first().attr("src");
+    }
+
+    private Elements getDetailsTableElements(Document gamePage) {
+        return gamePage.getElementsByClass("productDataTable").first()
+                .getElementsByClass("row--text row--text  attributeName");
+    }
+
+    private String getGameCategory(Document gamePage) {
+        return gamePage.getElementsByAttributeValue("itemtype", "http://schema.org/BreadcrumbList").last()
+                .getElementsByAttributeValue("itemprop", "itemListElement").last().text();
+    }
+
+    private String getGamePrice(Document gamePage) {
+        return gamePage.getElementsByClass("ta-price").first().text();
+    }
+
+    private String getGameImgUrl(Document gamePage) {
+        return gamePage.getElementsByAttributeValue("property", "og:image").first().attr("content");
+    }
+
+    private String getGameName(Document gamePage) {
+        return gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
+    }
+
+    private String getGameDescription(Document gamePage) {
+        return gamePage.getElementsByClass("productDescription").text();
+    }
+
+    private String getGameId(Document gamePage) {
+        return gamePage.getElementsByClass("js-reco-productlist").first().attr("page-product-id");
     }
 
     private String getTableRowContent(String[] elemDt) {

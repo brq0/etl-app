@@ -24,14 +24,15 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
         return extractData();
     }
 
-    private ArrayList<Document>  extractData() {
+    private ArrayList<Document> extractData() {
         ArrayList<Document> docsByPages = new ArrayList<>();
         ArrayList<Document> docsByGames = new ArrayList<>();
 
         try {
             for (int i = 1; ; i += 60) {
 
-                Document doc = Jsoup.connect("https://www.empik.com/multimedia/gry/mmo,34240204,s," + i + "?resultsPP=60").get();
+//                Document doc = Jsoup.connect("https://www.empik.com/multimedia/gry/mmo,34240204,s," + i + "?resultsPP=60").get();
+                Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s," + i + "?resultsPP=60").get();
                 doc.charset(Charset.forName("UTF-8"));
 
                 boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
@@ -48,10 +49,10 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
                         docsByGames.add(gameDoc);
                     }
 
-                }else{
+                } else {
                     break;
                 }
-
+                break;
             }
         } catch (IOException e) {
             e.printStackTrace();
