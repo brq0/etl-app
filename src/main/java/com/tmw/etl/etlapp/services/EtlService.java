@@ -1,6 +1,8 @@
 package com.tmw.etl.etlapp.services;
 
 import com.tmw.etl.etlapp.db.entities.Game;
+import com.tmw.etl.etlapp.db.entities.GameDetails;
+import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;
 import com.tmw.etl.etlapp.exc.NoDataException;
 import com.tmw.etl.etlapp.processes.DataExtractor;
@@ -27,14 +29,15 @@ public class EtlService {
 
     @Autowired
     private GameRepository gameRepository;
+    private GameDetailsRepository gameDetailsRepository;
 
     private Logger logger = LoggerFactory.getLogger(EtlService.class);
 
     private ArrayList<Document> rawData = null;
-    private ArrayList<Game> transformedData = null;
+    private ArrayList<GameDetails> transformedData = null;
 
     private Future<ArrayList<Document>> documentFuture = null;
-    private Future<ArrayList<Game>> gameFuture = null;
+    private Future<ArrayList<GameDetails>> gameFuture = null;
     private Future<Integer[]> loadFuture = null;
     private Future<Integer[]> etlProcessorFuture = null;
 
@@ -110,7 +113,7 @@ public class EtlService {
                               "Updated: " + counters[1] + " rows.", HttpStatus.OK);
             } else if (loadFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository));
+                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository, gameDetailsRepository));
                 executorService.shutdown();
             }
             return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);

@@ -15,6 +15,11 @@ public class GameDetails {
     private String price;
     private String imgUrl;
     private Integer position;
+    private String description;
+    private String producent;
+    private String publisher;
+    private String distributor;
+    private String releaseDate;
 
     public String getId() {
         return id;
@@ -64,6 +69,46 @@ public class GameDetails {
         this.position = position;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getProducent() {
+        return producent;
+    }
+
+    public void setProducent(String producent) {
+        this.producent = producent;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
+    public String getDistributor() {
+        return distributor;
+    }
+
+    public void setDistributor(String distributor) {
+        this.distributor = distributor;
+    }
+
+    public String getReleaseDate() {
+        return releaseDate;
+    }
+
+    public void setReleaseDate(String releaseDate) {
+        this.releaseDate = releaseDate;
+    }
+
     @Override
     public String toString() {
         return "GameDetails{" +
@@ -74,5 +119,18 @@ public class GameDetails {
                 ", imgUrl='" + imgUrl + '\'' +
                 ", position=" + position +
                 '}';
+    }
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj == null) return false;
+        if(obj == this) return true;
+        if(obj instanceof Game) {
+            GameDetails game = (GameDetails) obj;
+
+            return name.equals(game.getName());
+
+        }else return false;
     }
 }
