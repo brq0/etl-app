@@ -1,22 +1,29 @@
 package com.tmw.etl.etlapp.processes;
 
 import com.tmw.etl.etlapp.db.entities.Game;
+import com.tmw.etl.etlapp.db.entities.GameDetails;
 import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class DataLoader implements Callable<Integer[]> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ArrayList<Game> transferredData;
+
+    private ArrayList<Game> games;
+    private ArrayList<GameDetails> gamesDetails;
+
     private GameRepository gameRepository;
     private GameDetailsRepository gameDetailsRepository;
 
-    public DataLoader(ArrayList<Game> transferredData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository) {
-        this.transferredData = transferredData;
+
+
+    public DataLoader(Map<String, ArrayList<Object>> transferredData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository) {
+        games = (ArrayList<Game>) transferredData.get("games");
         this.gameRepository = gameRepository;
         this.gameDetailsRepository = gameDetailsRepository;
     }

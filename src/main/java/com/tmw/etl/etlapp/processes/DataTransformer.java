@@ -10,9 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class DataTransformer implements Callable<ArrayList<Game>> {
+public class DataTransformer implements Callable<Map<String, ArrayList<Object>>> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     private ArrayList<Document> rawDataPages;
 
@@ -21,12 +23,16 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
     }
 
     @Override
-    public ArrayList<Game> call() {
+    public Map<String, ArrayList<Object>> call() {
         return transformData(rawDataPages);
     }
 
-    private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
-        ArrayList<Game> games = new ArrayList<>();
+    private Map<String, ArrayList<Object>> transformData(ArrayList<Document> rawDataPages) {
+
+        Map<String, ArrayList<Object>> transformedData = new HashMap<>();
+
+        ArrayList<Object> games = new ArrayList<>();
+        ArrayList<Object> gamesDetails = new ArrayList<>();
 
         int position = 1;
 
@@ -84,11 +90,17 @@ public class DataTransformer implements Callable<ArrayList<Game>> {
             gameDetails.setPrice(gamePrice);
             gameDetails.setCategory(category);
             gameDetails.setImgUrl(gameImgUrl);
+            gameDetails.setDescription(gameDescription);
 
             games.add(game);
+            gamesDetails.add(gameDetails);
+
         }
 
-        return games;
+        transformedData.put("games", games);
+        transformedData.put("gamesDetails", gamesDetails);
+
+        return transformedData;
     }
 
     private String getGamePegiUrl(Element element) {
