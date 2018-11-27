@@ -1,6 +1,5 @@
 package com.tmw.etl.etlapp.services;
 
-import com.tmw.etl.etlapp.db.entities.Game;
 import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;
 import com.tmw.etl.etlapp.exc.NoDataException;
@@ -28,6 +27,8 @@ public class EtlService {
 
     @Autowired
     private GameRepository gameRepository;
+
+    @Autowired
     private GameDetailsRepository gameDetailsRepository;
 
     private Logger logger = LoggerFactory.getLogger(EtlService.class);
@@ -102,6 +103,7 @@ public class EtlService {
                     counters = loadFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error loading data.");
+                    logger.error(ex.toString());
                     return new ResponseEntity<>("Error loading data.", HttpStatus.CONFLICT);
                 }
                 transformedData = null;

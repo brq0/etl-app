@@ -53,6 +53,7 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
             String gameProducer = "";
             String gamePublisher = "";
             String gameReleaseDate = "";
+            String gameDistributor = "";
             String gamePegiUrl = "";
 
             for (Element element : elements) {
@@ -68,11 +69,8 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
                     case "Producent":
                         gameProducer = getTableRowContent(elemDt);
                         break;
-                    case "Liczba nośników":
-
-                        break;
-                    case "Wersja językowa":
-
+                    case "Dystrybutor":
+                        gameDistributor = getTableRowContent(elemDt);
                         break;
                     case "PEGI":
                         gamePegiUrl = getGamePegiUrl(element);
@@ -85,12 +83,24 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
             game.setId(gameId);
             game.setName(gameName);
 
+            System.out.println("gd length: " + gameDescription.length());
+            if(gameDescription.length() >= GameDetails.MAX_DESC_LENGTH){
+                System.out.println("LENGTH more than : " + GameDetails.MAX_DESC_LENGTH);
+                gameDescription = gameDescription.substring(0, GameDetails.MAX_DESC_LENGTH - 5) + "...";
+                System.out.println("L. now: " + gameDescription.length());
+            }
+
             gameDetails.setId(gameId);
-            gameDetails.setPosition(position);
-            gameDetails.setPrice(gamePrice);
             gameDetails.setCategory(category);
+            gameDetails.setPrice(gamePrice);
             gameDetails.setImgUrl(gameImgUrl);
+            gameDetails.setPosition(position);
             gameDetails.setDescription(gameDescription);
+            gameDetails.setProducer(gameProducer);
+            gameDetails.setPublisher(gamePublisher);
+            gameDetails.setDistributor(gameDistributor);
+            gameDetails.setReleaseDate(gameReleaseDate);
+
 
             games.add(game);
             gamesDetails.add(gameDetails);

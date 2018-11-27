@@ -20,10 +20,9 @@ public class DataLoader implements Callable<Integer[]> {
     private GameRepository gameRepository;
     private GameDetailsRepository gameDetailsRepository;
 
-
-
     public DataLoader(Map<String, ArrayList<Object>> transferredData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository) {
-        games = (ArrayList<Game>) transferredData.get("games");
+        games = (ArrayList) transferredData.get("games");
+        gamesDetails = (ArrayList) transferredData.get("gamesDetails");
         this.gameRepository = gameRepository;
         this.gameDetailsRepository = gameDetailsRepository;
     }
@@ -37,6 +36,12 @@ public class DataLoader implements Callable<Integer[]> {
         logger.info("LOADING DATA");
         int counter = 0;
         int updateCounter = 0;
+
+        for (int i=0; i<games.size(); i++){
+            gameRepository.save(games.get(i));
+            gameDetailsRepository.save(gamesDetails.get(i));
+            counter++;
+        }
 
 
 

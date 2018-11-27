@@ -1,13 +1,18 @@
 package com.tmw.etl.etlapp.db.entities;
 
 
+import org.hibernate.validator.constraints.Length;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 @Entity(name = "gamesDetails")
 @Table(name = "gamesDetails")
 public class GameDetails {
+    public static final int MAX_DESC_LENGTH = 3000;
+
     @Id
     private String id;
     private String category;
@@ -15,8 +20,10 @@ public class GameDetails {
     private String imgUrl;
     private Integer position;
     private String description;
-    private String producent;
+    private String producer;
     private String publisher;
+    @Lob
+    @Length(max = MAX_DESC_LENGTH)
     private String distributor;
     private String releaseDate;
 
@@ -68,12 +75,12 @@ public class GameDetails {
         this.description = description;
     }
 
-    public String getProducent() {
-        return producent;
+    public String getProducer() {
+        return producer;
     }
 
-    public void setProducent(String producent) {
-        this.producent = producent;
+    public void setProducer(String producer) {
+        this.producer = producer;
     }
 
     public String getPublisher() {
