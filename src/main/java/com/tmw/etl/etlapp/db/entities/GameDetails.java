@@ -19,11 +19,11 @@ public class GameDetails {
     private String price;
     private String imgUrl;
     private Integer position;
+    @Lob
+    @Length(max = MAX_DESC_LENGTH)
     private String description;
     private String producer;
     private String publisher;
-    @Lob
-    @Length(max = MAX_DESC_LENGTH)
     private String distributor;
     private String releaseDate;
 
