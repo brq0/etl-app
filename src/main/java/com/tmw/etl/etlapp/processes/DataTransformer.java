@@ -51,26 +51,18 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
 
             Elements elements = getDetailsTableElements(gamePage);
             String gameProducer = "";
-            String gamePublisher = "";
             String gameReleaseDate = "";
-            String gameDistributor = "";
             String gamePegiUrl = "";
 
             for (Element element : elements) {
                 String[] elemDt = element.text().split(":");
 
                 switch (elemDt[0]) {
-                    case "Wydawca":
-                        gamePublisher = getTableRowContent(elemDt);
-                        break;
                     case "Data premiery":
                         gameReleaseDate = getTableRowContent(elemDt);
                         break;
                     case "Producent":
                         gameProducer = getTableRowContent(elemDt);
-                        break;
-                    case "Dystrybutor":
-                        gameDistributor = getTableRowContent(elemDt);
                         break;
                     case "PEGI":
                         gamePegiUrl = getGamePegiUrl(element);
@@ -78,7 +70,7 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
                 }
             }
 
-            System.out.println(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " +  gamePrice + " --- " + category + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gamePublisher + " ---- " + gameReleaseDate);
+            System.out.println(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " +  gamePrice + " --- " + category + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gameReleaseDate);
 
             game.setId(gameId);
             game.setName(gameName);
@@ -97,14 +89,13 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
             gameDetails.setPosition(position);
             gameDetails.setDescription(gameDescription);
             gameDetails.setProducer(gameProducer);
-            gameDetails.setPublisher(gamePublisher);
-            gameDetails.setDistributor(gameDistributor);
             gameDetails.setReleaseDate(gameReleaseDate);
-
+            gameDetails.setPegiUrl(gamePegiUrl);
 
             games.add(game);
             gamesDetails.add(gameDetails);
 
+            position++;
         }
 
         transformedData.put("games", games);

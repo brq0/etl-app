@@ -1,7 +1,10 @@
 package com.tmw.etl.etlapp.services;
 
 import com.tmw.etl.etlapp.db.entities.Game;
+import com.tmw.etl.etlapp.db.entities.GameDetails;
+import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
 import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.responses.GameResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -19,8 +23,36 @@ public class DataService {
     @Autowired
     private GameRepository gameRepository;
 
-    public ResponseEntity<Iterable<Game>> getFullData() {
-        return new ResponseEntity<>(gameRepository.findAll(), HttpStatus.OK);
+    @Autowired
+    private GameDetailsRepository gameDetailsRepository;
+
+    public ResponseEntity<Iterable<GameResponse>> getFullData() {
+        ArrayList<GameResponse> gameResponsesList = new ArrayList<>();
+
+        for(Game game : gameRepository.findAll()){
+            GameResponse gameResponse = new GameResponse();
+            gameResponse.setId(game.getId());
+            gameResponse.setName(game.getName());
+
+            Optional<GameDetails> gameDetails = gameDetailsRepository.findById(game.getId());
+            if(gameDetails.isPresent()){
+                GameDetails gd = gameDetails.get();
+
+                gameResponse.setCategory(gd.getCategory());
+                gameResponse.setPrice(gd.getPrice());
+                gameResponse.setImgUrl(gd.getImgUrl());
+                gameResponse.setPosition(gd.getPosition());
+                gameResponse.setProducer(gd.getProducer());
+                gameResponse.setReleaseDate(gd.getReleaseDate());
+                gameResponse.setPegiUrl(gd.getPegiUrl());
+                gameResponse.setDescription(gd.getDescription());
+            }
+
+            gameResponsesList.add(gameResponse);
+        }
+
+
+        return new ResponseEntity<>(gameResponsesList, HttpStatus.OK);
     }
 
     public ResponseEntity<Optional<Game>> generateTxt(HttpServletResponse response, String id) {

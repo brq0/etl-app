@@ -1,30 +1,32 @@
-package com.tmw.etl.etlapp.db.entities;
+package com.tmw.etl.etlapp.db.responses;
 
-
-import org.hibernate.validator.constraints.Length;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-
-@Entity(name = "gamesDetails")
-@Table(name = "gamesDetails")
-public class GameDetails {
-    public static final int MAX_DESC_LENGTH = 3000;
-
-    @Id
+public class GameResponse {
     private String id;
+    private String name;
     private String category;
     private String price;
     private String imgUrl;
     private Integer position;
-    @Lob
-    @Length(max = MAX_DESC_LENGTH)
     private String description;
     private String producer;
     private String releaseDate;
     private String pegiUrl;
+
+    public GameResponse() {
+    }
+
+    public GameResponse(String id, String name, String category, String price, String imgUrl, Integer position, String description, String producer, String releaseDate, String pegiUrl) {
+        this.id = id;
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.imgUrl = imgUrl;
+        this.position = position;
+        this.description = description;
+        this.producer = producer;
+        this.releaseDate = releaseDate;
+        this.pegiUrl = pegiUrl;
+    }
 
     public String getId() {
         return id;
@@ -32,6 +34,14 @@ public class GameDetails {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getCategory() {
@@ -96,32 +106,5 @@ public class GameDetails {
 
     public void setPegiUrl(String pegiUrl) {
         this.pegiUrl = pegiUrl;
-    }
-
-
-    @Override
-    public String toString() {
-//        @TODO wydruk jak do csv
-        return "GameDetails{" +
-                "id='" + id + '\'' +
-                ", category='" + category + '\'' +
-                ", price='" + price + '\'' +
-                ", imgUrl='" + imgUrl + '\'' +
-                ", position=" + position +
-                '}';
-    }
-
-
-    @Override
-    public boolean equals(Object obj) {
-        if(obj == null) return false;
-        if(obj == this) return true;
-        if(obj instanceof Game) {
-            GameDetails game = (GameDetails) obj;
-
-//            @TODO
-            return true;
-
-        }else return false;
     }
 }
