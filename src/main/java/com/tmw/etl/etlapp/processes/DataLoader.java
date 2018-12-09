@@ -25,13 +25,13 @@ public class DataLoader implements Callable<Integer[]> {
     private ProducerRepository producerRepository;
     private PegiCodeRepository pegiCodeRepository;
 
-    public DataLoader(Map<String, ArrayList<Object>> transferredData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository,
+    public DataLoader(Map<String, ArrayList<Object>> transformedData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository,
                       CategoryRepository categoryRepository, ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
-        games = (ArrayList) transferredData.get("games");
-        gamesDetails = (ArrayList) transferredData.get("gamesDetails");
-        categories = (ArrayList) transferredData.get("categories");
-        producers = (ArrayList) transferredData.get("producers");
-        pegiCodes = (ArrayList) transferredData.get("pegiCodes");
+        games = (ArrayList) transformedData.get("games");
+        gamesDetails = (ArrayList) transformedData.get("gamesDetails");
+        categories = (ArrayList) transformedData.get("categories");
+        producers = (ArrayList) transformedData.get("producers");
+        pegiCodes = (ArrayList) transformedData.get("pegiCodes");
 
 
         this.gameRepository = gameRepository;
@@ -46,7 +46,7 @@ public class DataLoader implements Callable<Integer[]> {
         return loadData();
     }
 
-    private Integer[] loadData() {
+    public Integer[] loadData() {
         logger.info("LOADING DATA");
         int counter = 0;
         int updateCounter = 0;

@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface PegiCodeRepository extends CrudRepository<PegiCode, Integer> {
     @Query(value = "SELECT * from pegi_codes " +
-            "WHERE imgUrl = :imgUrl", nativeQuery = true)
+            "WHERE img_url = :imgUrl", nativeQuery = true)
     Optional<PegiCode> findByPegiImgUrl(@Param("imgUrl") String imgUrl);
 }

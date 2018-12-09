@@ -26,7 +26,7 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
         return transformData(rawDataPages);
     }
 
-    private Map<String, ArrayList<Object>> transformData(ArrayList<Document> rawDataPages) {
+    public Map<String, ArrayList<Object>> transformData(ArrayList<Document> rawDataPages) {
 
         Map<String, ArrayList<Object>> transformedData = new HashMap<>();
         ArrayList<Object> games = new ArrayList<>();

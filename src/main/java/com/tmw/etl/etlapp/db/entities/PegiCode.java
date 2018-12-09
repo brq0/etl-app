@@ -6,8 +6,8 @@ import javax.persistence.Table;
 import java.util.Objects;
 
 
-@Entity(name = "pegicodes")
-@Table(name = "pegicodes")
+@Entity(name = "pegi_codes")
+@Table(name = "pegi_codes")
 public class PegiCode {
 
     @Id

@@ -136,7 +136,8 @@ public class EtlService {
     public ResponseEntity<String> runFulleEtlProcess() {
         if(etlProcessorFuture == null){
             ExecutorService executorService = Executors.newSingleThreadExecutor();
-            etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository));
+            etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository, gameDetailsRepository,
+                    categoryRepository, producerRepository, pegiCodeRepository));
             executorService.shutdown();
         }
         if(etlProcessorFuture != null && etlProcessorFuture.isDone()){

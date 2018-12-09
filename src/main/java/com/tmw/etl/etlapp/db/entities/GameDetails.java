@@ -8,8 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
-@Entity(name = "gamesDetails")
-@Table(name = "gamesDetails")
+@Entity(name = "games_details")
+@Table(name = "games_details")
 public class GameDetails {
     public static final int MAX_DESC_LENGTH = 3000;
 

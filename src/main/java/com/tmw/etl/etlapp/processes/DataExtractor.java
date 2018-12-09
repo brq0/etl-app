@@ -24,7 +24,7 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
         return extractData();
     }
 
-    private ArrayList<Document> extractData() {
+    public ArrayList<Document> extractData() {
         ArrayList<Document> docsByPages = new ArrayList<>();
         ArrayList<Document> docsByGames = new ArrayList<>();
 
