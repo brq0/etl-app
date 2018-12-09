@@ -27,8 +27,6 @@ public class EtlService {
     @Autowired
     private GameRepository gameRepository;
     @Autowired
-    private GameDetailsRepository gameDetailsRepository;
-    @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
     private ProducerRepository producerRepository;
@@ -84,7 +82,7 @@ public class EtlService {
                 }
                 gameFuture = null;
                 return new ResponseEntity<>("Data transformed successfully. " +
-                        "Created " + transformedData.get("gamesDetails").size() + " items.", HttpStatus.OK);
+                        "Created " + transformedData.get("games").size() + " items.", HttpStatus.OK);
             }
             return new ResponseEntity<>("Data is being transformed..", HttpStatus.OK);
         } else {
@@ -114,12 +112,12 @@ public class EtlService {
                 rawData = null;
                 loadFuture = null;
                 return new ResponseEntity<>(
-                        "Data loaded successfully. Inserted: " + counters[0] + " rows. " +
-                              "Updated: " + counters[1] + " rows.", HttpStatus.OK);
+                        "Data loaded successfully. Inserted: " + counters[0] + " games. " +
+                              "Updated: " + counters[1] + " games.", HttpStatus.OK);
             } else if (loadFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository, gameDetailsRepository,
-                                                        categoryRepository, producerRepository, pegiCodeRepository));
+                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository, categoryRepository,
+                        producerRepository, pegiCodeRepository));
                 executorService.shutdown();
             }
             return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);
@@ -136,8 +134,8 @@ public class EtlService {
     public ResponseEntity<String> runFulleEtlProcess() {
         if(etlProcessorFuture == null){
             ExecutorService executorService = Executors.newSingleThreadExecutor();
-            etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository, gameDetailsRepository,
-                    categoryRepository, producerRepository, pegiCodeRepository));
+            etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository, categoryRepository,
+                    producerRepository, pegiCodeRepository));
             executorService.shutdown();
         }
         if(etlProcessorFuture != null && etlProcessorFuture.isDone()){
@@ -149,7 +147,7 @@ public class EtlService {
                 return new ResponseEntity<>("An error encountered during full ETL process.", HttpStatus.CONFLICT);
             }
             etlProcessorFuture = null;
-            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counters[0] + " rows. " + "Updated: " + counters[1] + " rows.", HttpStatus.OK);
+            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counters[0] + " games. " + "Updated: " + counters[1] + " games.", HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Full ETL Process is running.. Please wait..", HttpStatus.OK);
         }

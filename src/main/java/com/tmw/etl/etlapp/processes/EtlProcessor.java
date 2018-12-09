@@ -10,15 +10,13 @@ import java.util.concurrent.Callable;
 public class EtlProcessor implements Callable<Integer[]> {
 
     private GameRepository gameRepository;
-    private GameDetailsRepository gameDetailsRepository;
     private CategoryRepository categoryRepository;
     private ProducerRepository producerRepository;
     private PegiCodeRepository pegiCodeRepository;
 
-    public EtlProcessor(GameRepository gameRepository, GameDetailsRepository gameDetailsRepository,
-                        CategoryRepository categoryRepository, ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
+    public EtlProcessor(GameRepository gameRepository, CategoryRepository categoryRepository,
+                        ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
         this.gameRepository = gameRepository;
-        this.gameDetailsRepository = gameDetailsRepository;
         this.categoryRepository = categoryRepository;
         this.producerRepository = producerRepository;
         this.pegiCodeRepository = pegiCodeRepository;
@@ -32,7 +30,7 @@ public class EtlProcessor implements Callable<Integer[]> {
         DataTransformer dataTransformer = new DataTransformer(pagesDocs);
         Map<String, ArrayList<Object>> transformedData = dataTransformer.transformData(pagesDocs);
 
-        DataLoader dataLoader = new DataLoader(transformedData, gameRepository, gameDetailsRepository,
+        DataLoader dataLoader = new DataLoader(transformedData, gameRepository,
                 categoryRepository, producerRepository, pegiCodeRepository);
         return dataLoader.loadData();
     }

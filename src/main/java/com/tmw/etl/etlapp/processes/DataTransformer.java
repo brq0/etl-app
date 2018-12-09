@@ -27,20 +27,15 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
     }
 
     public Map<String, ArrayList<Object>> transformData(ArrayList<Document> rawDataPages) {
-
         Map<String, ArrayList<Object>> transformedData = new HashMap<>();
         ArrayList<Object> games = new ArrayList<>();
-        ArrayList<Object> gamesDetails = new ArrayList<>();
         ArrayList<Object> categories = new ArrayList<>();
         ArrayList<Object> pegiCodes = new ArrayList<>();
         ArrayList<Object> producers = new ArrayList<>();
-
         int position = 1;
 
         for (Document gamePage : rawDataPages) {
-
             Game game = new Game();
-            GameDetails gameDetails = new GameDetails();
 
             String gameId = getGameId(gamePage);
             String gameDescription = getGameDescription(gamePage);
@@ -48,7 +43,6 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
             String gameImgUrl = getGameImgUrl(gamePage);
             String gamePrice = getGamePrice(gamePage);
             String gameCategory = getGameCategory(gamePage);
-
 
             Elements elements = getDetailsTableElements(gamePage);
             String gameProducer = "";
@@ -76,19 +70,16 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
             game.setId(gameId);
             game.setName(gameName);
 
-            if(gameDescription.length() >= GameDetails.MAX_DESC_LENGTH){
-                gameDescription = gameDescription.substring(0, GameDetails.MAX_DESC_LENGTH - 5) + "...";
+            if(gameDescription.length() >= Game.MAX_DESC_LENGTH){
+                gameDescription = gameDescription.substring(0, Game.MAX_DESC_LENGTH - 5) + "...";
             }
 
-            gameDetails.setId(gameId);
-            gameDetails.setPrice(gamePrice);
-            gameDetails.setImgUrl(gameImgUrl);
-            gameDetails.setPosition(position);
-            gameDetails.setDescription(gameDescription);
-            gameDetails.setReleaseDate(gameReleaseDate);
-
-            games.add(game);
-
+            game.setId(gameId);
+            game.setPrice(gamePrice);
+            game.setImgUrl(gameImgUrl);
+            game.setPosition(position);
+            game.setDescription(gameDescription);
+            game.setReleaseDate(gameReleaseDate);
 
             Category category = new Category();
             category.setName(gameCategory);
@@ -117,12 +108,11 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
                 producer.setId(producers.indexOf(producer)+1);
             }
 
-            gameDetails.setCategoryId(category.getId());
-            gameDetails.setProducerId(producer.getId());
-            gameDetails.setPegiCodeId(pegiCode.getId());
+            game.setCategoryId(category.getId());
+            game.setProducerId(producer.getId());
+            game.setPegiCodeId(pegiCode.getId());
 
-            gamesDetails.add(gameDetails);
-
+            games.add(game);
             position++;
         }
 
@@ -134,7 +124,6 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
         transformedData.put("producers", producers);
         transformedData.put("pegiCodes", pegiCodes);
         transformedData.put("games", games);
-        transformedData.put("gamesDetails", gamesDetails);
 
         return transformedData;
     }

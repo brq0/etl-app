@@ -14,28 +14,23 @@ public class DataLoader implements Callable<Integer[]> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private ArrayList<Game> games;
-    private ArrayList<GameDetails> gamesDetails;
     private ArrayList<Category> categories;
     private ArrayList<Producer> producers;
     private ArrayList<PegiCode> pegiCodes;
 
     private GameRepository gameRepository;
-    private GameDetailsRepository gameDetailsRepository;
     private CategoryRepository categoryRepository;
     private ProducerRepository producerRepository;
     private PegiCodeRepository pegiCodeRepository;
 
-    public DataLoader(Map<String, ArrayList<Object>> transformedData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository,
+    public DataLoader(Map<String, ArrayList<Object>> transformedData, GameRepository gameRepository,
                       CategoryRepository categoryRepository, ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
         games = (ArrayList) transformedData.get("games");
-        gamesDetails = (ArrayList) transformedData.get("gamesDetails");
         categories = (ArrayList) transformedData.get("categories");
         producers = (ArrayList) transformedData.get("producers");
         pegiCodes = (ArrayList) transformedData.get("pegiCodes");
 
-
         this.gameRepository = gameRepository;
-        this.gameDetailsRepository = gameDetailsRepository;
         this.categoryRepository = categoryRepository;
         this.producerRepository = producerRepository;
         this.pegiCodeRepository = pegiCodeRepository;
@@ -48,7 +43,7 @@ public class DataLoader implements Callable<Integer[]> {
 
     public Integer[] loadData() {
         logger.info("LOADING DATA");
-        int counter = 0;
+        int insertCounter = 0;
         int updateCounter = 0;
 
         categories.forEach(it -> {
@@ -56,7 +51,7 @@ public class DataLoader implements Callable<Integer[]> {
                     if (!cat.isPresent()) {
                         categoryRepository.save(it);
                     } else if (cat.isPresent()) {
-                        gamesDetails.forEach(game -> {
+                        games.forEach(game -> {
                                     if (game.getCategoryId() == it.getId()) {
                                         game.setCategoryId(cat.get().getId());
                                     }
@@ -71,7 +66,7 @@ public class DataLoader implements Callable<Integer[]> {
                     if (!producer.isPresent()) {
                         producerRepository.save(it);
                     } else if (producer.isPresent()) {
-                        gamesDetails.forEach(game -> {
+                        games.forEach(game -> {
                                     if (game.getProducerId() == it.getId()) {
                                         game.setProducerId(producer.get().getId());
                                     }
@@ -86,7 +81,7 @@ public class DataLoader implements Callable<Integer[]> {
                     if (!pegiCode.isPresent()) {
                         pegiCodeRepository.save(it);
                     } else if (pegiCode.isPresent()) {
-                        gamesDetails.forEach(game -> {
+                        games.forEach(game -> {
                                     if (game.getPegiCodeId() == it.getId()) {
                                         game.setPegiCodeId(pegiCode.get().getId());
                                     }
@@ -96,57 +91,29 @@ public class DataLoader implements Callable<Integer[]> {
                 }
         );
 
-        for (int i = 0; i < games.size(); i++) {
-            gameRepository.save(games.get(i));
-            gameDetailsRepository.save(gamesDetails.get(i));
-            counter++;
+        for(Game game : games){
+            Optional<Game> dbGame = gameRepository.findById(game.getId());
+            if(!dbGame.isPresent()){
+                gameRepository.save(game);
+                insertCounter++;
+            }else if(dbGame.isPresent()){
+                if(!dbGame.get().equals(game)){
+                    gameRepository.updateGame(game.getId(),
+                                              game.getName(),
+                                              game.getCategoryId(),
+                                              game.getPrice(),
+                                              game.getImgUrl(),
+                                              game.getPosition(),
+                                              game.getDescription(),
+                                              game.getProducerId(),
+                                              game.getReleaseDate(),
+                                              game.getPegiCodeId()
+                                            );
+                    updateCounter++;
+                }
+            }
         }
-
-//        @TODO update na samym gamedetails / game
-
-
-//        for (GameDetails gameDetails : transferredData) {
-//            Game game = new Game();
-//
-//            game.setName(gameDetails.getName());
-//            game.setId(gameDetails.getId());
-//
-//            if(!gameDetailsRepository.findById(gameDetails.getId()).isPresent()){
-//
-//                gameDetailsRepository.save(gameDetails);
-//                logger.debug(gameDetails.toString());
-//                counter++;
-//            } else {
-//
-//                GameDetails compareGame = gameDetailsRepository.findById(gameDetails.getId()).get();
-//
-//                if (!game.equals(compareGame)) {
-//
-//                    System.out.println("UPDATING GAME - TODO");
-//
-//                    gameDetailsRepository.updateRow( gameDetails.getId(), gameDetails.getName());
-//
-//                    // TODO: HERE gameRepositoryDetails.updateRow()
-//
-//                }
-//
-//            }
-//
-//            if (!gameRepository.findById(game.getId()).isPresent()) {         //if not in db
-//                gameRepository.save(game);
-//                logger.debug(game.toString());
-//
-//            } else {
-//                    Game compareGame = gameRepository.findById(game.getId()).get();
-//                    if (!game.equals(compareGame)) {
-//                        gameRepository.updateGame(
-//                                game.getId(),
-//                                game.getName());
-//
-//                        updateCounter++;
-//                    }
-//                }
-//            }
-        return new Integer[]{counter, updateCounter};
+        logger.info("Data loaded successfully. Inserted: " + insertCounter + " games. Updated: " + updateCounter);
+        return new Integer[]{insertCounter, updateCounter};
     }
 }

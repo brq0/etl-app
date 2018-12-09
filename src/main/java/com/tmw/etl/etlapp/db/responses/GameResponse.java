@@ -107,4 +107,9 @@ public class GameResponse {
     public void setPegiUrl(String pegiUrl) {
         this.pegiUrl = pegiUrl;
     }
+
+    @Override
+    public String toString() {
+        return id + ", " + name + ", " + category + ", " + price + ", " + releaseDate + ", " + producer + ", " + position + ", " + pegiUrl  + ", " + imgUrl;
+    }
 }
