@@ -1,7 +1,6 @@
 package com.tmw.etl.etlapp.services;
 
-import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
-import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.repositories.*;
 import com.tmw.etl.etlapp.exc.NoDataException;
 import com.tmw.etl.etlapp.processes.DataExtractor;
 import com.tmw.etl.etlapp.processes.DataLoader;
@@ -27,9 +26,14 @@ public class EtlService {
 
     @Autowired
     private GameRepository gameRepository;
-
     @Autowired
     private GameDetailsRepository gameDetailsRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ProducerRepository producerRepository;
+    @Autowired
+    private PegiCodeRepository pegiCodeRepository;
 
     private Logger logger = LoggerFactory.getLogger(EtlService.class);
 
@@ -80,7 +84,7 @@ public class EtlService {
                 }
                 gameFuture = null;
                 return new ResponseEntity<>("Data transformed successfully. " +
-                        "Created " + transformedData.size() + " items.", HttpStatus.OK);
+                        "Created " + transformedData.get("gamesDetails").size() + " items.", HttpStatus.OK);
             }
             return new ResponseEntity<>("Data is being transformed..", HttpStatus.OK);
         } else {
@@ -114,7 +118,8 @@ public class EtlService {
                               "Updated: " + counters[1] + " rows.", HttpStatus.OK);
             } else if (loadFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository, gameDetailsRepository));
+                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository, gameDetailsRepository,
+                                                        categoryRepository, producerRepository, pegiCodeRepository));
                 executorService.shutdown();
             }
             return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);

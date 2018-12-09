@@ -15,16 +15,16 @@ public class GameDetails {
 
     @Id
     private String id;
-    private String category;
+    private int categoryId;
     private String price;
     private String imgUrl;
     private Integer position;
     @Lob
     @Length(max = MAX_DESC_LENGTH)
     private String description;
-    private String producer;
+    private int producerId;
     private String releaseDate;
-    private String pegiUrl;
+    private int pegiCodeId;
 
     public String getId() {
         return id;
@@ -34,12 +34,12 @@ public class GameDetails {
         this.id = id;
     }
 
-    public String getCategory() {
-        return category;
+    public int getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getPrice() {
@@ -74,12 +74,12 @@ public class GameDetails {
         this.description = description;
     }
 
-    public String getProducer() {
-        return producer;
+    public int getProducerId() {
+        return producerId;
     }
 
-    public void setProducer(String producer) {
-        this.producer = producer;
+    public void setProducerId(int producerId) {
+        this.producerId = producerId;
     }
 
     public String getReleaseDate() {
@@ -90,12 +90,12 @@ public class GameDetails {
         this.releaseDate = releaseDate;
     }
 
-    public String getPegiUrl() {
-        return pegiUrl;
+    public int getPegiCodeId() {
+        return pegiCodeId;
     }
 
-    public void setPegiUrl(String pegiUrl) {
-        this.pegiUrl = pegiUrl;
+    public void setPegiCodeId(int pegiCodeId) {
+        this.pegiCodeId = pegiCodeId;
     }
 
 
@@ -104,7 +104,7 @@ public class GameDetails {
 //        @TODO wydruk jak do csv
         return "GameDetails{" +
                 "id='" + id + '\'' +
-                ", category='" + category + '\'' +
+                ", category='" + categoryId + '\'' +
                 ", price='" + price + '\'' +
                 ", imgUrl='" + imgUrl + '\'' +
                 ", position=" + position +

@@ -1,9 +1,7 @@
 package com.tmw.etl.etlapp.processes;
 
-import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.entities.GameDetails;
-import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
-import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.entities.*;
+import com.tmw.etl.etlapp.db.repositories.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,15 +14,30 @@ public class DataLoader implements Callable<Integer[]> {
 
     private ArrayList<Game> games;
     private ArrayList<GameDetails> gamesDetails;
+    private ArrayList<Category> categories;
+    private ArrayList<Producer> producers;
+    private ArrayList<PegiCode> pegiCodes;
 
     private GameRepository gameRepository;
     private GameDetailsRepository gameDetailsRepository;
+    private CategoryRepository categoryRepository;
+    private ProducerRepository producerRepository;
+    private PegiCodeRepository pegiCodeRepository;
 
-    public DataLoader(Map<String, ArrayList<Object>> transferredData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository) {
+    public DataLoader(Map<String, ArrayList<Object>> transferredData, GameRepository gameRepository, GameDetailsRepository gameDetailsRepository,
+                      CategoryRepository categoryRepository, ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
         games = (ArrayList) transferredData.get("games");
         gamesDetails = (ArrayList) transferredData.get("gamesDetails");
+        categories = (ArrayList) transferredData.get("categories");
+        producers = (ArrayList) transferredData.get("producers");
+        pegiCodes = (ArrayList) transferredData.get("pegiCodes");
+
+
         this.gameRepository = gameRepository;
         this.gameDetailsRepository = gameDetailsRepository;
+        this.categoryRepository = categoryRepository;
+        this.producerRepository = producerRepository;
+        this.pegiCodeRepository = pegiCodeRepository;
     }
 
     @Override
@@ -37,12 +50,27 @@ public class DataLoader implements Callable<Integer[]> {
         int counter = 0;
         int updateCounter = 0;
 
+        categories.forEach( it ->
+//                @TODO jeśli nie ma takiej kategorii w bd to save, jeśli jest to nic -> dla wszystkich poniżej to samo
+//                @TODO bo tu sie może zmieniać id, bo są one generowane dynamicznie wg popularności na empik
+                categoryRepository.save(it)
+        );
+
+        producers.forEach( it ->
+                producerRepository.save(it)
+        );
+
+        pegiCodes.forEach( it ->
+                pegiCodeRepository.save(it)
+        );
+
         for (int i=0; i<games.size(); i++){
             gameRepository.save(games.get(i));
             gameDetailsRepository.save(gamesDetails.get(i));
             counter++;
         }
 
+//        @TODO bardzo umiejetny check na kategorii, producent i pegiCode w grze (update if sth has changed)
 
 
 //        for (GameDetails gameDetails : transferredData) {

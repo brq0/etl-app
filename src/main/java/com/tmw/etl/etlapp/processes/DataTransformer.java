@@ -1,7 +1,6 @@
 package com.tmw.etl.etlapp.processes;
 
-import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.entities.GameDetails;
+import com.tmw.etl.etlapp.db.entities.*;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -30,9 +29,11 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
     private Map<String, ArrayList<Object>> transformData(ArrayList<Document> rawDataPages) {
 
         Map<String, ArrayList<Object>> transformedData = new HashMap<>();
-
         ArrayList<Object> games = new ArrayList<>();
         ArrayList<Object> gamesDetails = new ArrayList<>();
+        ArrayList<Object> categories = new ArrayList<>();
+        ArrayList<Object> pegiCodes = new ArrayList<>();
+        ArrayList<Object> producers = new ArrayList<>();
 
         int position = 1;
 
@@ -46,7 +47,7 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
             String gameName = getGameName(gamePage);
             String gameImgUrl = getGameImgUrl(gamePage);
             String gamePrice = getGamePrice(gamePage);
-            String category = getGameCategory(gamePage);
+            String gameCategory = getGameCategory(gamePage);
 
 
             Elements elements = getDetailsTableElements(gamePage);
@@ -70,34 +71,68 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
                 }
             }
 
-            System.out.println(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " +  gamePrice + " --- " + category + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gameReleaseDate);
+            logger.info(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " +  gamePrice + " --- " + gameCategory + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gameReleaseDate);
 
             game.setId(gameId);
             game.setName(gameName);
 
-            System.out.println("gd length: " + gameDescription.length());
             if(gameDescription.length() >= GameDetails.MAX_DESC_LENGTH){
-                System.out.println("LENGTH more than : " + GameDetails.MAX_DESC_LENGTH);
                 gameDescription = gameDescription.substring(0, GameDetails.MAX_DESC_LENGTH - 5) + "...";
-                System.out.println("L. now: " + gameDescription.length());
             }
 
             gameDetails.setId(gameId);
-            gameDetails.setCategory(category);
             gameDetails.setPrice(gamePrice);
             gameDetails.setImgUrl(gameImgUrl);
             gameDetails.setPosition(position);
             gameDetails.setDescription(gameDescription);
-            gameDetails.setProducer(gameProducer);
             gameDetails.setReleaseDate(gameReleaseDate);
-            gameDetails.setPegiUrl(gamePegiUrl);
 
             games.add(game);
+
+
+            Category category = new Category();
+            category.setName(gameCategory);
+            if(!categories.contains(category)){
+                categories.add(category);
+                category.setId(categories.size());
+            }else{
+                category.setId(categories.indexOf(category)+1);
+            }
+
+            PegiCode pegiCode = new PegiCode();
+            pegiCode.setImgUrl(gamePegiUrl);
+            if(!pegiCodes.contains(pegiCode)){
+                pegiCodes.add(pegiCode);
+                pegiCode.setId(pegiCodes.size());
+            }else{
+                pegiCode.setId(pegiCodes.indexOf(pegiCode)+1);
+            }
+
+            Producer producer = new Producer();
+            producer.setName(gameProducer);
+            if(!producers.contains(producer)){
+                producers.add(producer);
+                producer.setId(producers.size());
+            }else{
+                producer.setId(producers.indexOf(producer)+1);
+            }
+
+            gameDetails.setCategoryId(category.getId());
+            gameDetails.setProducerId(producer.getId());
+            gameDetails.setPegiCodeId(pegiCode.getId());
+
             gamesDetails.add(gameDetails);
 
             position++;
         }
 
+        logger.info("Categories size: " + categories.size());
+        logger.info("Producers size: " + producers.size());
+        logger.info("PegiCodes size: " + pegiCodes.size());
+
+        transformedData.put("categories", categories);
+        transformedData.put("producers", producers);
+        transformedData.put("pegiCodes", pegiCodes);
         transformedData.put("games", games);
         transformedData.put("gamesDetails", gamesDetails);
 

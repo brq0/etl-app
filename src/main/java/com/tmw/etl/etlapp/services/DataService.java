@@ -1,9 +1,7 @@
 package com.tmw.etl.etlapp.services;
 
-import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.entities.GameDetails;
-import com.tmw.etl.etlapp.db.repositories.GameDetailsRepository;
-import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.entities.*;
+import com.tmw.etl.etlapp.db.repositories.*;
 import com.tmw.etl.etlapp.db.responses.GameResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +20,15 @@ public class DataService {
 
     @Autowired
     private GameRepository gameRepository;
-
     @Autowired
     private GameDetailsRepository gameDetailsRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ProducerRepository producerRepository;
+    @Autowired
+    private PegiCodeRepository pegiCodeRepository;
+
 
     public ResponseEntity<Iterable<GameResponse>> getFullData() {
         ArrayList<GameResponse> gameResponsesList = new ArrayList<>();
@@ -38,19 +42,21 @@ public class DataService {
             if(gameDetails.isPresent()){
                 GameDetails gd = gameDetails.get();
 
-                gameResponse.setCategory(gd.getCategory());
                 gameResponse.setPrice(gd.getPrice());
                 gameResponse.setImgUrl(gd.getImgUrl());
                 gameResponse.setPosition(gd.getPosition());
-                gameResponse.setProducer(gd.getProducer());
                 gameResponse.setReleaseDate(gd.getReleaseDate());
-                gameResponse.setPegiUrl(gd.getPegiUrl());
                 gameResponse.setDescription(gd.getDescription());
-            }
 
+                Optional<Category> category = categoryRepository.findById(gd.getCategoryId());
+                gameResponse.setCategory(category.isPresent() ? category.get().getName() : "None/Error");
+                Optional<Producer> producer = producerRepository.findById(gd.getProducerId());
+                gameResponse.setProducer(producer.isPresent() ? producer.get().getName() : "None/Error");
+                Optional<PegiCode> pegiCode = pegiCodeRepository.findById(gd.getPegiCodeId());
+                gameResponse.setPegiUrl(pegiCode.isPresent() ? pegiCode.get().getImgUrl() : "None/Erorr");
+            }
             gameResponsesList.add(gameResponse);
         }
-
 
         return new ResponseEntity<>(gameResponsesList, HttpStatus.OK);
     }

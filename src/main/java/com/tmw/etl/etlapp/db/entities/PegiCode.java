@@ -5,13 +5,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Objects;
 
-@Entity(name = "producers")
-@Table(name = "producers")
-public class Producer {
+
+@Entity(name = "pegicodes")
+@Table(name = "pegicodes")
+public class PegiCode {
 
     @Id
     private int id;
-    private String name;
+    private String imgUrl;
 
     public int getId() {
         return id;
@@ -21,29 +22,29 @@ public class Producer {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getImgUrl() {
+        return imgUrl;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
     }
 
     @Override
     public String toString() {
-        return id + ',' + name ;
+        return id + ", " + imgUrl;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Producer producer = (Producer) o;
-        return Objects.equals(name, producer.name);
+        PegiCode pegiCode = (PegiCode) o;
+        return Objects.equals(imgUrl, pegiCode.imgUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(imgUrl);
     }
 }
