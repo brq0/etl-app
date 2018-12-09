@@ -77,6 +77,7 @@ public class EtlService {
                     transformedData = gameFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error transforming data.");
+                    ex.printStackTrace();
                     return new ResponseEntity<>("Error transforming data. " +
                             "", HttpStatus.CONFLICT);
                 }

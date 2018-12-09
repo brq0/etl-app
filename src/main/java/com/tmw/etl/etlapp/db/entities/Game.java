@@ -7,6 +7,11 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity(name = "games")
@@ -25,7 +30,7 @@ public class Game {
     @Length(max = MAX_DESC_LENGTH)
     private String description;
     private int producerId;
-    private String releaseDate;
+    private Date releaseDate;
     private int pegiCodeId;
 
     public String getId() {
@@ -93,11 +98,19 @@ public class Game {
     }
 
     public String getReleaseDate() {
-        return releaseDate;
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        return formatter.format(releaseDate);
     }
 
     public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date;
+        try {
+            date = dateFormat.parse(releaseDate);
+            this.releaseDate = date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getPegiCodeId() {

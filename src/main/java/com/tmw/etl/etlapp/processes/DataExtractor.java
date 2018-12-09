@@ -14,9 +14,12 @@ import java.util.concurrent.Callable;
 
 public class DataExtractor implements Callable<ArrayList<Document>> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    String baseUrl = "";
+    int maxPages = 1;
 
     public DataExtractor() {
-
+        baseUrl = "https://www.empik.com/multimedia/xbox-one/gry/,342402,";
+        maxPages = 2;
     }
 
     @Override
@@ -25,39 +28,28 @@ public class DataExtractor implements Callable<ArrayList<Document>> {
     }
 
     public ArrayList<Document> extractData() {
-        ArrayList<Document> docsByPages = new ArrayList<>();
         ArrayList<Document> docsByGames = new ArrayList<>();
 
         try {
-            for (int i = 1; ; i += 60) {
-
-                Document doc = Jsoup.connect("https://www.empik.com/multimedia/gry/mmo,34240204,s," + i + "?resultsPP=60").get();
-//                Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s," + i + "?resultsPP=60").get();
+            for (int i=1; i<=maxPages*30; i+=30) {
+                Document doc = Jsoup.connect(baseUrl + "s," + i).get();
                 doc.charset(Charset.forName("UTF-8"));
-
                 boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
 
                 if (hasElements) {
-                    docsByPages.add(doc);
-
                     Elements gamesURL = doc.getElementsByClass("img seoImage");
-
                     for (Element game : gamesURL) {
                         Document gameDoc = Jsoup.connect("https://www.empik.com" + game.attr("href")).get();
                         gameDoc.charset(Charset.forName("UTF-8"));
-
                         docsByGames.add(gameDoc);
                     }
-
                 } else {
                     break;
                 }
-                break;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         logger.info("Extracted " + docsByGames.size() + " games."); //
         return docsByGames;
     }

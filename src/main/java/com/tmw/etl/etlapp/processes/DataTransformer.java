@@ -65,12 +65,12 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
                 }
             }
 
-            logger.info(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " +  gamePrice + " --- " + gameCategory + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gameReleaseDate);
+            logger.info(gameId + " -- " + gameImgUrl + " --- " + gameName + " --- " + gamePrice + " --- " + gameCategory + " --- " + gamePegiUrl + " --- " + gameProducer + " ---- " + gameReleaseDate);
 
             game.setId(gameId);
             game.setName(gameName);
 
-            if(gameDescription.length() >= Game.MAX_DESC_LENGTH){
+            if (gameDescription.length() >= Game.MAX_DESC_LENGTH) {
                 gameDescription = gameDescription.substring(0, Game.MAX_DESC_LENGTH - 5) + "...";
             }
 
@@ -83,29 +83,29 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
 
             Category category = new Category();
             category.setName(gameCategory);
-            if(!categories.contains(category)){
+            if (!categories.contains(category)) {
                 categories.add(category);
                 category.setId(categories.size());
-            }else{
-                category.setId(categories.indexOf(category)+1);
+            } else {
+                category.setId(categories.indexOf(category) + 1);
             }
 
             PegiCode pegiCode = new PegiCode();
             pegiCode.setImgUrl(gamePegiUrl);
-            if(!pegiCodes.contains(pegiCode)){
+            if (!pegiCodes.contains(pegiCode)) {
                 pegiCodes.add(pegiCode);
                 pegiCode.setId(pegiCodes.size());
-            }else{
-                pegiCode.setId(pegiCodes.indexOf(pegiCode)+1);
+            } else {
+                pegiCode.setId(pegiCodes.indexOf(pegiCode) + 1);
             }
 
             Producer producer = new Producer();
             producer.setName(gameProducer);
-            if(!producers.contains(producer)){
+            if (!producers.contains(producer)) {
                 producers.add(producer);
                 producer.setId(producers.size());
-            }else{
-                producer.setId(producers.indexOf(producer)+1);
+            } else {
+                producer.setId(producers.indexOf(producer) + 1);
             }
 
             game.setCategoryId(category.getId());
@@ -129,8 +129,12 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
     }
 
     private String getGamePegiUrl(Element element) {
-        return "https://www.empik.com" + element.getElementsByClass("pegiCode").first()
-                .getElementsByTag("img").first().attr("src");
+        try {
+            return "https://www.empik.com" + element.getElementsByClass("pegiCode").first()
+                    .getElementsByTag("img").first().attr("src");
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private Elements getDetailsTableElements(Document gamePage) {
@@ -139,35 +143,59 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
     }
 
     private String getGameCategory(Document gamePage) {
-        return gamePage.getElementsByAttributeValue("itemtype", "http://schema.org/BreadcrumbList").last()
-                .getElementsByAttributeValue("itemprop", "itemListElement").last().text();
+        try {
+            return gamePage.getElementsByAttributeValue("itemtype", "http://schema.org/BreadcrumbList").last()
+                    .getElementsByAttributeValue("itemprop", "itemListElement").last().text();
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private String getGamePrice(Document gamePage) {
-        return gamePage.getElementsByClass("ta-price").first().text();
+        try {
+            return gamePage.getElementsByClass("ta-price").first().text();
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private String getGameImgUrl(Document gamePage) {
-        return gamePage.getElementsByAttributeValue("property", "og:image").first().attr("content");
+        try {
+            return gamePage.getElementsByAttributeValue("property", "og:image").first().attr("content");
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private String getGameName(Document gamePage) {
-        return gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
+        try {
+            return gamePage.getElementsByAttributeValue("property", "og:title").first().attr("content");
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private String getGameDescription(Document gamePage) {
-        return gamePage.getElementsByClass("productDescription").text();
+        try {
+            return gamePage.getElementsByClass("productDescription").text();
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private String getGameId(Document gamePage) {
-        return gamePage.getElementsByClass("js-reco-productlist").first().attr("page-product-id");
+        try {
+            return gamePage.getElementsByClass("js-reco-productlist").first().attr("page-product-id");
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 
     private String getTableRowContent(String[] elemDt) {
-        return String.join("", Arrays.copyOfRange(elemDt, 1, elemDt.length));
-    }
-
-    private String getPureTextOfTableRow(String row, String text) {
-        return row.substring(row.indexOf(text) + text.length()).trim();
+        try {
+            return String.join("", Arrays.copyOfRange(elemDt, 1, elemDt.length));
+        } catch (NullPointerException exc) {
+            return "";
+        }
     }
 }
