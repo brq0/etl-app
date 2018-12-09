@@ -23,10 +23,10 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
 
     @Override
     public Map<String, ArrayList<Object>> call() {
-        return transformData(rawDataPages);
+        return transformData(null);
     }
 
-    public Map<String, ArrayList<Object>> transformData(ArrayList<Document> rawDataPages) {
+    public Map<String, ArrayList<Object>> transformData(EtlProcessor etlProcessor) {
         Map<String, ArrayList<Object>> transformedData = new HashMap<>();
         ArrayList<Object> games = new ArrayList<>();
         ArrayList<Object> categories = new ArrayList<>();
@@ -124,6 +124,10 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
         transformedData.put("producers", producers);
         transformedData.put("pegiCodes", pegiCodes);
         transformedData.put("games", games);
+
+        if(etlProcessor != null) {
+            etlProcessor.setInfo("E T L: Data is being transformed.. Transformed: " + transformedData.size() + " games.");
+        }
 
         return transformedData;
     }

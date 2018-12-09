@@ -13,6 +13,7 @@ public class EtlProcessor implements Callable<Integer[]> {
     private CategoryRepository categoryRepository;
     private ProducerRepository producerRepository;
     private PegiCodeRepository pegiCodeRepository;
+    private String info = "Full E T L process is running. Please wait..";
 
     public EtlProcessor(GameRepository gameRepository, CategoryRepository categoryRepository,
                         ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
@@ -25,15 +26,21 @@ public class EtlProcessor implements Callable<Integer[]> {
     @Override
     public Integer[] call() {
         DataExtractor dataExtractor = new DataExtractor();
-        ArrayList<Document> pagesDocs = dataExtractor.extractData();
+        ArrayList<Document> pagesDocs = dataExtractor.extractData(this);
 
         DataTransformer dataTransformer = new DataTransformer(pagesDocs);
-        Map<String, ArrayList<Object>> transformedData = dataTransformer.transformData(pagesDocs);
+        Map<String, ArrayList<Object>> transformedData = dataTransformer.transformData(this);
 
         DataLoader dataLoader = new DataLoader(transformedData, gameRepository,
                 categoryRepository, producerRepository, pegiCodeRepository);
-        return dataLoader.loadData();
+        return dataLoader.loadData(this);
     }
 
+    public void setInfo(String info){
+        this.info = info;
+    }
 
+    public String getInfo(){
+        return info;
+    }
 }

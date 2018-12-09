@@ -38,13 +38,17 @@ public class DataLoader implements Callable<Integer[]> {
 
     @Override
     public Integer[] call() {
-        return loadData();
+        return loadData(null);
     }
 
-    public Integer[] loadData() {
+    public Integer[] loadData(EtlProcessor etlProcessor) {
         logger.info("LOADING DATA");
         int insertCounter = 0;
         int updateCounter = 0;
+
+        if(etlProcessor != null) {
+            etlProcessor.setInfo("E T L: Data is being loaded.");
+        }
 
         categories.forEach(it -> {
                     Optional<Category> cat = categoryRepository.findByName(it.getName());
@@ -113,6 +117,7 @@ public class DataLoader implements Callable<Integer[]> {
                 }
             }
         }
+
         logger.info("Data loaded successfully. Inserted: " + insertCounter + " games. Updated: " + updateCounter);
         return new Integer[]{insertCounter, updateCounter};
     }
