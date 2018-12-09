@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class DataLoader implements Callable<Integer[]> {
@@ -50,27 +51,58 @@ public class DataLoader implements Callable<Integer[]> {
         int counter = 0;
         int updateCounter = 0;
 
-        categories.forEach( it ->
-//                @TODO jeśli nie ma takiej kategorii w bd to save, jeśli jest to nic -> dla wszystkich poniżej to samo
-//                @TODO bo tu sie może zmieniać id, bo są one generowane dynamicznie wg popularności na empik
-                categoryRepository.save(it)
+        categories.forEach(it -> {
+                    Optional<Category> cat = categoryRepository.findByName(it.getName());
+                    if (!cat.isPresent()) {
+                        categoryRepository.save(it);
+                    } else if (cat.isPresent()) {
+                        gamesDetails.forEach(game -> {
+                                    if (game.getCategoryId() == it.getId()) {
+                                        game.setCategoryId(cat.get().getId());
+                                    }
+                                }
+                        );
+                    }
+                }
         );
 
-        producers.forEach( it ->
-                producerRepository.save(it)
+        producers.forEach(it -> {
+                    Optional<Producer> producer = producerRepository.findByName(it.getName());
+                    if (!producer.isPresent()) {
+                        producerRepository.save(it);
+                    } else if (producer.isPresent()) {
+                        gamesDetails.forEach(game -> {
+                                    if (game.getProducerId() == it.getId()) {
+                                        game.setProducerId(producer.get().getId());
+                                    }
+                                }
+                        );
+                    }
+                }
         );
 
-        pegiCodes.forEach( it ->
-                pegiCodeRepository.save(it)
+        pegiCodes.forEach(it -> {
+                    Optional<PegiCode> pegiCode = pegiCodeRepository.findByPegiImgUrl(it.getImgUrl());
+                    if (!pegiCode.isPresent()) {
+                        pegiCodeRepository.save(it);
+                    } else if (pegiCode.isPresent()) {
+                        gamesDetails.forEach(game -> {
+                                    if (game.getPegiCodeId() == it.getId()) {
+                                        game.setPegiCodeId(pegiCode.get().getId());
+                                    }
+                                }
+                        );
+                    }
+                }
         );
 
-        for (int i=0; i<games.size(); i++){
+        for (int i = 0; i < games.size(); i++) {
             gameRepository.save(games.get(i));
             gameDetailsRepository.save(gamesDetails.get(i));
             counter++;
         }
 
-//        @TODO bardzo umiejetny check na kategorii, producent i pegiCode w grze (update if sth has changed)
+//        @TODO update na samym gamedetails / game
 
 
 //        for (GameDetails gameDetails : transferredData) {

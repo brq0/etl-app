@@ -13,7 +13,7 @@ public interface GameDetailsRepository extends CrudRepository<GameDetails, Strin
     @Modifying
     @Query("UPDATE games SET " +
             "name = :name " +
-            "WHERE product_id = :id")
+            "WHERE id = :id")
     void updateRow(@Param("id") String id,
                     @Param("name") String name);
 
