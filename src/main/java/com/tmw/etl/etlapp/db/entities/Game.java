@@ -140,7 +140,7 @@ public class Game {
                 Objects.equals(imgUrl, that.imgUrl) &&
                 Objects.equals(position, that.position) &&
                 Objects.equals(description, that.description) &&
-                Objects.equals(releaseDate, that.releaseDate);
+                releaseDate.compareTo(that.releaseDate) == 0;
     }
 
     @Override

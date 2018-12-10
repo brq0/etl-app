@@ -59,10 +59,10 @@ public class DataService {
         return gameResponsesList;
     }
 
-    public GameResponse getSingleGameDataFromDb(String gameId){
+    public GameResponse getSingleGameDataFromDb(String gameId) {
         Optional<Game> game = gameRepository.findById(gameId);
         GameResponse gameResponse = new GameResponse();
-        if(game.isPresent()){
+        if (game.isPresent()) {
             gameResponse.setId(game.get().getId());
             gameResponse.setName(game.get().getName());
 
@@ -86,12 +86,8 @@ public class DataService {
         logger.info("ROW ID:" + id);
         String fileName = "record.txt";
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-        try {
-            GameResponse content = getSingleGameDataFromDb(id);
-            return new ResponseEntity<>(content.toString(), HttpStatus.OK);
-        } catch (NumberFormatException exc) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        }
+        GameResponse content = getSingleGameDataFromDb(id);
+        return new ResponseEntity<>(content.toString(), HttpStatus.OK);
     }
 
     public ResponseEntity<String> generateCsv(HttpServletResponse response) {

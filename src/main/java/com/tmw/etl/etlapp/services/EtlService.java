@@ -96,7 +96,8 @@ public class EtlService {
             try {
                 throw new NoDataException("There is no data to transform. Extract data in the first place.");
             } catch (NoDataException exc) {
-                logger.error(exc.getMessage());
+                logger.error("There is no data to transform. Extract data in the first place.");
+                exc.printStackTrace();
                 return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
         }
@@ -112,7 +113,7 @@ public class EtlService {
                     counters = loadFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error loading data.");
-                    logger.error(ex.toString());
+                    ex.printStackTrace();
                     return new ResponseEntity<>("Error loading data.", HttpStatus.CONFLICT);
                 }
                 transformedData = null;
@@ -132,7 +133,8 @@ public class EtlService {
             try {
                 throw new NoDataException("There is no data or data was not transformed. Extract data or transform it in the first place.");
             } catch (NoDataException exc) {
-                logger.error(exc.getMessage());
+                logger.error("There is no data or data was not transformed. Extract data or transform it in the first place.");
+                exc.printStackTrace();
                 return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
         }
@@ -152,6 +154,7 @@ public class EtlService {
                 counters = etlProcessorFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("An error encountered during full ETL process.");
+                ex.printStackTrace();
                 return new ResponseEntity<>("An error encountered during full ETL process.", HttpStatus.CONFLICT);
             }
             etlProcessorFuture = null;
