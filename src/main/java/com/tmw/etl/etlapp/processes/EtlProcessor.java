@@ -1,119 +1,46 @@
 package com.tmw.etl.etlapp.processes;
 
-import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.repositories.GameRepository;
-import org.jsoup.Jsoup;
+import com.tmw.etl.etlapp.db.repositories.*;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class EtlProcessor implements Callable<Integer[]> {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
     private GameRepository gameRepository;
+    private CategoryRepository categoryRepository;
+    private ProducerRepository producerRepository;
+    private PegiCodeRepository pegiCodeRepository;
+    private String info = "Full E T L process is running. Please wait..";
 
-    public EtlProcessor(GameRepository gameRepository) {
+    public EtlProcessor(GameRepository gameRepository, CategoryRepository categoryRepository,
+                        ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
         this.gameRepository = gameRepository;
+        this.categoryRepository = categoryRepository;
+        this.producerRepository = producerRepository;
+        this.pegiCodeRepository = pegiCodeRepository;
     }
 
     @Override
     public Integer[] call() {
-        ArrayList<Document> pagesDocs = extractData();
-        ArrayList<Game> games = transformData(pagesDocs);
-        return loadData(games);
+        DataExtractor dataExtractor = new DataExtractor();
+        ArrayList<Document> pagesDocs = dataExtractor.extractData(this);
+
+        DataTransformer dataTransformer = new DataTransformer(pagesDocs);
+        Map<String, ArrayList<Object>> transformedData = dataTransformer.transformData(this);
+
+        DataLoader dataLoader = new DataLoader(transformedData, gameRepository,
+                categoryRepository, producerRepository, pegiCodeRepository);
+        return dataLoader.loadData(this);
     }
 
-    private ArrayList<Document> extractData() {
-        ArrayList<Document> docsByPages = new ArrayList<>();
-        try {
-            for (int i = 1; ; i += 60) {
-                Document doc = Jsoup.connect("https://www.empik.com/multimedia/xbox-one/gry/,342402,s," + i + "?resultsPP=60").get();
-                doc.charset(Charset.forName("UTF-8"));
-                boolean hasElements = !(doc.getAllElements().hasClass("sort notFound"));
-
-                if (hasElements)
-                    docsByPages.add(doc);
-                else
-                    break;
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        logger.info("" + docsByPages.size()); // CHECK IF THERE 7 PAGES
-        return docsByPages;
+    public void setInfo(String info){
+        this.info = info;
     }
 
-    private ArrayList<Game> transformData(ArrayList<Document> rawDataPages) {
-        ArrayList<Game> games = new ArrayList<>();
-        int position = 1;
-        for (Document doc : rawDataPages) {
-            Elements elements = doc.getElementsByClass("js-reco-product");
-            for (Element element : elements) {
-                Game game = new Game();
-
-                String productId = element.attr("data-product-id");
-                String productName = element.attr("data-product-name");
-                String productCategory = element.attr("data-product-category");
-                String productPrice = element.getElementsByClass("price").text();
-                String productImageUrl = element.getElementsByClass("lazy").attr("lazy-img");
-
-                if (productPrice.equals("")) {
-                    productPrice = "product unvailable";
-                }
-                if (productId.equals("")) {
-                    continue;
-                }
-                if (productName.equals("")) {
-                    continue;
-                }
-
-                game.setProductId(productId);
-                game.setProductName(productName);
-                game.setProductCategory(productCategory);
-                game.setProductPrice(productPrice);
-                game.setProductImageUrl(productImageUrl);
-                game.setPosition(position++);
-
-                games.add(game);
-            }
-        }
-        return games;
-    }
-
-    private Integer[] loadData(ArrayList<Game> games) {
-        logger.info("LOADING DATA");
-        Integer counter = 0;
-        Integer updateCounter = 0;
-
-        for (Game game : games) {
-            if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
-                gameRepository.save(game);
-                logger.debug(game.toString());
-                counter++;
-            } else {
-                Game compareGame = gameRepository.findById(game.getProductId()).get();
-                if (!game.equals(compareGame)) {
-                    gameRepository.updateGame(
-                            game.getProductId(),
-                            game.getProductName(),
-                            game.getProductCategory(),
-                            game.getProductPrice(),
-                            game.getProductImageUrl(),
-                            game.getPosition());
-
-                    updateCounter++;
-                }
-            }
-        }
-        return new Integer[]{counter, updateCounter};
+    public String getInfo(){
+        return info;
     }
 }

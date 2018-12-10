@@ -1,7 +1,6 @@
 package com.tmw.etl.etlapp.services;
 
-import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.repositories.*;
 import com.tmw.etl.etlapp.exc.NoDataException;
 import com.tmw.etl.etlapp.processes.DataExtractor;
 import com.tmw.etl.etlapp.processes.DataLoader;
@@ -16,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,16 +26,25 @@ public class EtlService {
 
     @Autowired
     private GameRepository gameRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
+    @Autowired
+    private ProducerRepository producerRepository;
+    @Autowired
+    private PegiCodeRepository pegiCodeRepository;
 
     private Logger logger = LoggerFactory.getLogger(EtlService.class);
 
     private ArrayList<Document> rawData = null;
-    private ArrayList<Game> transformedData = null;
+    private Map<String, ArrayList<Object>> transformedData = null;
 
     private Future<ArrayList<Document>> documentFuture = null;
-    private Future<ArrayList<Game>> gameFuture = null;
+    private Future<Map<String, ArrayList<Object>>> gameFuture = null;
     private Future<Integer[]> loadFuture = null;
     private Future<Integer[]> etlProcessorFuture = null;
+
+    private DataExtractor dataExtractor = null;
+    private EtlProcessor etlProcessor = null;
 
     public ResponseEntity<String> extractData() {
 
@@ -43,20 +52,23 @@ public class EtlService {
 
         if (documentFuture == null) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
-            documentFuture = executorService.submit(new DataExtractor());
+            dataExtractor = new DataExtractor();
+            documentFuture = executorService.submit(dataExtractor);
             executorService.shutdown();
         } else if (documentFuture.isDone()) {
             try {
                 rawData = documentFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("Error extracting data");
+                ex.printStackTrace();
                 return new ResponseEntity<>("Error extracting data.", HttpStatus.CONFLICT);
             }
             documentFuture = null;
+            dataExtractor = null;
             return new ResponseEntity<>("Data extracted successfully. " +
                     "Extracted " + rawData.size() + " pages of items.", HttpStatus.OK);
         }
-        return new ResponseEntity<>("Data is being extracted..", HttpStatus.OK);
+        return new ResponseEntity<>("Data is being extracted.. Extracted: " + dataExtractor.getDataSize() + " games.", HttpStatus.OK);
     }
 
     public ResponseEntity<String> transformData() {
@@ -71,19 +83,21 @@ public class EtlService {
                     transformedData = gameFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error transforming data.");
+                    ex.printStackTrace();
                     return new ResponseEntity<>("Error transforming data. " +
                             "", HttpStatus.CONFLICT);
                 }
                 gameFuture = null;
                 return new ResponseEntity<>("Data transformed successfully. " +
-                        "Created " + transformedData.size() + " items.", HttpStatus.OK);
+                        "Created " + transformedData.get("games").size() + " items.", HttpStatus.OK);
             }
             return new ResponseEntity<>("Data is being transformed..", HttpStatus.OK);
         } else {
             try {
                 throw new NoDataException("There is no data to transform. Extract data in the first place.");
             } catch (NoDataException exc) {
-                logger.error(exc.getMessage());
+                logger.error("There is no data to transform. Extract data in the first place.");
+                exc.printStackTrace();
                 return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
         }
@@ -94,22 +108,24 @@ public class EtlService {
         logger.debug("DATA: " + transformedData);
         if (transformedData != null) {
             if (loadFuture != null && loadFuture.isDone()) {
-                Integer[] counters = {0,0};
+                Integer[] counters = {0, 0};
                 try {
                     counters = loadFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error loading data.");
+                    ex.printStackTrace();
                     return new ResponseEntity<>("Error loading data.", HttpStatus.CONFLICT);
                 }
                 transformedData = null;
                 rawData = null;
                 loadFuture = null;
                 return new ResponseEntity<>(
-                        "Data loaded successfully. Inserted: " + counters[0] + " rows. " +
-                              "Updated: " + counters[1] + " rows.", HttpStatus.OK);
+                        "Data loaded successfully. Inserted: " + counters[0] + " games. " +
+                                "Updated: " + counters[1] + " games.", HttpStatus.OK);
             } else if (loadFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository));
+                loadFuture = executorService.submit(new DataLoader(transformedData, gameRepository, categoryRepository,
+                        producerRepository, pegiCodeRepository));
                 executorService.shutdown();
             }
             return new ResponseEntity<>("Data is being loaded..", HttpStatus.OK);
@@ -117,30 +133,36 @@ public class EtlService {
             try {
                 throw new NoDataException("There is no data or data was not transformed. Extract data or transform it in the first place.");
             } catch (NoDataException exc) {
-                logger.error(exc.getMessage());
+                logger.error("There is no data or data was not transformed. Extract data or transform it in the first place.");
+                exc.printStackTrace();
                 return new ResponseEntity<>(exc.getMessage(), HttpStatus.ACCEPTED);
             }
         }
     }
 
     public ResponseEntity<String> runFulleEtlProcess() {
-        if(etlProcessorFuture == null){
+        if (etlProcessorFuture == null) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
-            etlProcessorFuture = executorService.submit(new EtlProcessor(gameRepository));
+            etlProcessor = new EtlProcessor(gameRepository, categoryRepository,
+                    producerRepository, pegiCodeRepository);
+            etlProcessorFuture = executorService.submit(etlProcessor);
             executorService.shutdown();
         }
-        if(etlProcessorFuture != null && etlProcessorFuture.isDone()){
+        if (etlProcessorFuture != null && etlProcessorFuture.isDone()) {
             Integer[] counters = {0, 0};
             try {
                 counters = etlProcessorFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("An error encountered during full ETL process.");
+                ex.printStackTrace();
                 return new ResponseEntity<>("An error encountered during full ETL process.", HttpStatus.CONFLICT);
             }
             etlProcessorFuture = null;
-            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counters[0] + " rows. " + "Updated: " + counters[1] + " rows.", HttpStatus.OK);
-        }else{
-            return new ResponseEntity<>("Full ETL Process is running.. Please wait..", HttpStatus.OK);
+            etlProcessor = null;
+            return new ResponseEntity<>("Full ETL Process Done. Inserted: " + counters[0] + " games. " + "Updated: " + counters[1] + " games.", HttpStatus.OK);
+        } else {
+            logger.info("ETL PROCESSOR+ " + etlProcessor.getInfo());
+            return new ResponseEntity<>(etlProcessor.getInfo(), HttpStatus.OK);
         }
     }
 }

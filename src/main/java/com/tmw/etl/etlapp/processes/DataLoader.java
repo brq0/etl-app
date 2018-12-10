@@ -1,53 +1,124 @@
 package com.tmw.etl.etlapp.processes;
 
-import com.tmw.etl.etlapp.db.entities.Game;
-import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.entities.*;
+import com.tmw.etl.etlapp.db.repositories.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 public class DataLoader implements Callable<Integer[]> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    private ArrayList<Game> transferredData;
-    private GameRepository gameRepository;
 
-    public DataLoader(ArrayList<Game> transferredData, GameRepository gameRepository) {
-        this.transferredData = transferredData;
+    private ArrayList<Game> games;
+    private ArrayList<Category> categories;
+    private ArrayList<Producer> producers;
+    private ArrayList<PegiCode> pegiCodes;
+
+    private GameRepository gameRepository;
+    private CategoryRepository categoryRepository;
+    private ProducerRepository producerRepository;
+    private PegiCodeRepository pegiCodeRepository;
+
+    public DataLoader(Map<String, ArrayList<Object>> transformedData, GameRepository gameRepository,
+                      CategoryRepository categoryRepository, ProducerRepository producerRepository, PegiCodeRepository pegiCodeRepository) {
+        games = (ArrayList) transformedData.get("games");
+        categories = (ArrayList) transformedData.get("categories");
+        producers = (ArrayList) transformedData.get("producers");
+        pegiCodes = (ArrayList) transformedData.get("pegiCodes");
+
         this.gameRepository = gameRepository;
+        this.categoryRepository = categoryRepository;
+        this.producerRepository = producerRepository;
+        this.pegiCodeRepository = pegiCodeRepository;
     }
 
     @Override
     public Integer[] call() {
-        return loadData();
+        return loadData(null);
     }
 
-    private Integer[] loadData() {
+    public Integer[] loadData(EtlProcessor etlProcessor) {
         logger.info("LOADING DATA");
-        int counter = 0;
+        int insertCounter = 0;
         int updateCounter = 0;
 
-        for (Game game : transferredData) {
-            if (!gameRepository.findById(game.getProductId()).isPresent()) {         //if not in db
-                gameRepository.save(game);
-                logger.debug(game.toString());
-                counter++;
-            } else {
-                    Game compareGame = gameRepository.findById(game.getProductId()).get();
-                    if (!game.equals(compareGame)) {
-                        gameRepository.updateGame(
-                                game.getProductId(),
-                                game.getProductName(),
-                                game.getProductCategory(),
-                                game.getProductPrice(),
-                                game.getProductImageUrl(),
-                                game.getPosition());
+        if(etlProcessor != null) {
+            etlProcessor.setInfo("E T L: Data is being loaded.");
+        }
 
-                        updateCounter++;
+        categories.forEach(it -> {
+                    Optional<Category> cat = categoryRepository.findByName(it.getName());
+                    if (!cat.isPresent()) {
+                        categoryRepository.save(it);
+                    } else if (cat.isPresent()) {
+                        games.forEach(game -> {
+                                    if (game.getCategoryId() == it.getId()) {
+                                        game.setCategoryId(cat.get().getId());
+                                    }
+                                }
+                        );
                     }
                 }
+        );
+
+        producers.forEach(it -> {
+                    Optional<Producer> producer = producerRepository.findByName(it.getName());
+                    if (!producer.isPresent()) {
+                        producerRepository.save(it);
+                    } else if (producer.isPresent()) {
+                        games.forEach(game -> {
+                                    if (game.getProducerId() == it.getId()) {
+                                        game.setProducerId(producer.get().getId());
+                                    }
+                                }
+                        );
+                    }
+                }
+        );
+
+        pegiCodes.forEach(it -> {
+                    Optional<PegiCode> pegiCode = pegiCodeRepository.findByPegiImgUrl(it.getImgUrl());
+                    if (!pegiCode.isPresent()) {
+                        pegiCodeRepository.save(it);
+                    } else if (pegiCode.isPresent()) {
+                        games.forEach(game -> {
+                                    if (game.getPegiCodeId() == it.getId()) {
+                                        game.setPegiCodeId(pegiCode.get().getId());
+                                    }
+                                }
+                        );
+                    }
+                }
+        );
+
+        for(Game game : games){
+            Optional<Game> dbGame = gameRepository.findById(game.getId());
+            if(!dbGame.isPresent()){
+                gameRepository.save(game);
+                insertCounter++;
+            }else if(dbGame.isPresent()){
+                if(!dbGame.get().equals(game)){
+                    gameRepository.updateGame(game.getId(),
+                                              game.getName(),
+                                              game.getCategoryId(),
+                                              game.getPrice(),
+                                              game.getImgUrl(),
+                                              game.getPosition(),
+                                              game.getDescription(),
+                                              game.getProducerId(),
+                                              game.getReleaseDate(),
+                                              game.getPegiCodeId()
+                                            );
+                    updateCounter++;
+                }
             }
-        return new Integer[]{counter, updateCounter};
+        }
+
+        logger.info("Data loaded successfully. Inserted: " + insertCounter + " games. Updated: " + updateCounter);
+        return new Integer[]{insertCounter, updateCounter};
     }
 }
