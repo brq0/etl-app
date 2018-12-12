@@ -22,6 +22,11 @@ repositories {
 	mavenCentral()
 }
 
+bootJar {
+	baseName = 'etl-app-tmw'
+	version =  '1.0.0'
+}
+
 group = 'com.tmw.etl'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
