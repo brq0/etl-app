@@ -110,6 +110,6 @@ public class GameResponse {
 
     @Override
     public String toString() {
-        return id + ", " + name + ", " + category + ", " + price + ", " + releaseDate + ", " + producer + ", " + position + ", " + pegiUrl  + ", " + imgUrl;
+        return id + ", " + name + ", " + category + ", " + price.replace(',','.') + ", " + releaseDate + ", " + producer + ", " + position + ", " + pegiUrl  + ", " + imgUrl;
     }
 }
