@@ -103,6 +103,10 @@ public class DataService {
 
     public ResponseEntity<String> restartDb() {
         gameRepository.restartDb();
+        categoryRepository.restartDb();
+        producerRepository.restartDb();
+        pegiCodeRepository.restartDb();
+
         return new ResponseEntity<>("Database restarted.", HttpStatus.OK);
     }
 }
