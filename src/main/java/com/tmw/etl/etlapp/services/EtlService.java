@@ -38,7 +38,7 @@ public class EtlService {
     private ArrayList<Document> rawData = null;
     private Map<String, ArrayList<Object>> transformedData = null;
 
-    private Future<ArrayList<Document>> documentFuture = null;
+    private Future<ArrayList<Document>> rawGamesDocumentsFuture = null;
     private Future<Map<String, ArrayList<Object>>> gameFuture = null;
     private Future<Integer[]> loadFuture = null;
     private Future<Integer[]> etlProcessorFuture = null;
@@ -50,20 +50,20 @@ public class EtlService {
 
         if (transformedData != null) transformedData = null;
 
-        if (documentFuture == null) {
+        if (rawGamesDocumentsFuture == null) {
             ExecutorService executorService = Executors.newSingleThreadExecutor();
             dataExtractor = new DataExtractor();
-            documentFuture = executorService.submit(dataExtractor);
+            rawGamesDocumentsFuture = executorService.submit(dataExtractor);
             executorService.shutdown();
-        } else if (documentFuture.isDone()) {
+        } else if (rawGamesDocumentsFuture.isDone()) {
             try {
-                rawData = documentFuture.get();
+                rawData = rawGamesDocumentsFuture.get();
             } catch (InterruptedException | ExecutionException ex) {
                 logger.error("Error extracting data");
                 ex.printStackTrace();
                 return new ResponseEntity<>("Error extracting data.", HttpStatus.CONFLICT);
             }
-            documentFuture = null;
+            rawGamesDocumentsFuture = null;
             dataExtractor = null;
             return new ResponseEntity<>("Data extracted successfully. " +
                     "Extracted " + rawData.size() + " pages of items.", HttpStatus.OK);

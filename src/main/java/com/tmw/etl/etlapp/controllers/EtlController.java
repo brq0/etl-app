@@ -12,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "http://localhost:3000")
 public class EtlController {
 
-    @Autowired
-    private GameRepository gameRepository;
 
     @Autowired
     private EtlService etlService;
