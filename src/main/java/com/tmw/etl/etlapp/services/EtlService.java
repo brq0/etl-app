@@ -39,7 +39,7 @@ public class EtlService {
     private Map<String, ArrayList<Object>> transformedData = null;
 
     private Future<ArrayList<Document>> rawGamesDocumentsFuture = null;
-    private Future<Map<String, ArrayList<Object>>> gameFuture = null;
+    private Future<Map<String, ArrayList<Object>>> transformedDataFuture = null;
     private Future<Integer[]> loadFuture = null;
     private Future<Integer[]> etlProcessorFuture = null;
 
@@ -74,20 +74,20 @@ public class EtlService {
     public ResponseEntity<String> transformData() {
         logger.debug("DATA: " + rawData);
         if (rawData != null) {
-            if (gameFuture == null) {
+            if (transformedDataFuture == null) {
                 ExecutorService executorService = Executors.newSingleThreadExecutor();
-                gameFuture = executorService.submit(new DataTransformer(rawData));
+                transformedDataFuture = executorService.submit(new DataTransformer(rawData));
                 executorService.shutdown();
-            } else if (gameFuture.isDone()) {
+            } else if (transformedDataFuture.isDone()) {
                 try {
-                    transformedData = gameFuture.get();
+                    transformedData = transformedDataFuture.get();
                 } catch (InterruptedException | ExecutionException ex) {
                     logger.error("Error transforming data.");
                     ex.printStackTrace();
                     return new ResponseEntity<>("Error transforming data. " +
                             "", HttpStatus.CONFLICT);
                 }
-                gameFuture = null;
+                transformedDataFuture = null;
                 return new ResponseEntity<>("Data transformed successfully. " +
                         "Created " + transformedData.get("games").size() + " items.", HttpStatus.OK);
             }
