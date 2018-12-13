@@ -13,5 +13,7 @@
 set etl_ui_loc=C:\etl-tmw\etl-ui
 set etl_app_jar_path=C:\etl-tmw\etl-app-tmw-1.0.0.jar
 
+mysql --host=127.0.0.1 --port=3306 --user=root --password=Test123. -e"CREATE DATABASE IF NOT EXISTS etlapp;ALTER DATABASE etlapp CHARACTER SET utf8 COLLATE utf8_unicode_ci;SET NAMES 'UTF8';SET CHARSET 'UTF8';"
+
 start cmd /k npm start --prefix %etl_ui_loc%
 start cmd /k java -jar %etl_app_jar_path%

@@ -1,20 +1,38 @@
 package com.tmw.etl.etlapp.services;
 
-import com.tmw.etl.etlapp.db.entities.*;
-import com.tmw.etl.etlapp.db.repositories.*;
+import com.tmw.etl.etlapp.db.entities.Category;
+import com.tmw.etl.etlapp.db.entities.Game;
+import com.tmw.etl.etlapp.db.entities.PegiCode;
+import com.tmw.etl.etlapp.db.entities.Producer;
+import com.tmw.etl.etlapp.db.repositories.CategoryRepository;
+import com.tmw.etl.etlapp.db.repositories.GameRepository;
+import com.tmw.etl.etlapp.db.repositories.PegiCodeRepository;
+import com.tmw.etl.etlapp.db.repositories.ProducerRepository;
 import com.tmw.etl.etlapp.db.responses.GameResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
+@PropertySource("application.properties")
 public class DataService {
     private Logger logger = LoggerFactory.getLogger(DataService.class);
 
@@ -27,6 +45,45 @@ public class DataService {
     @Autowired
     private PegiCodeRepository pegiCodeRepository;
 
+    @Value("${spring.jpa.hibernate.ddl-auto}")
+    private String dbAccess;
+
+    @Autowired
+    DataSource dataSource;
+
+    @PostConstruct
+    public void createDatabase(){
+        System.out.println(dbAccess + "EEEE");
+        String fileName = "etlapp_";
+        String query = "";
+        File file = new File(fileName);
+        switch (dbAccess.toLowerCase()){
+            case "create":
+            case "none":
+                fileName += dbAccess + ".sql";
+                break;
+            default:
+                logger.error("No property {spring.jpa.hibernate.ddl-auto} or invalid value." +
+                        "\n Set it to [create] or [none]");
+                System.exit(1);
+                break;
+        }
+        try {
+            try (BufferedReader br = new BufferedReader(new FileReader("src/main/resources/" + fileName))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    query += line;
+                }
+            }
+            System.out.println(query);
+
+            Connection connection = dataSource.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.execute();
+        }catch (IOException | SQLException exc){
+            exc.printStackTrace();
+        }
+    }
 
     public ResponseEntity<Iterable<GameResponse>> getFullData() {
         return new ResponseEntity<>(getFullDataFromDb(), HttpStatus.OK);
