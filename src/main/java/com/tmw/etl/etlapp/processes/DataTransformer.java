@@ -143,7 +143,7 @@ public class DataTransformer implements Callable<Map<String, ArrayList<Object>>>
 
     private Elements getDetailsTableElements(Document gamePage) {
         return gamePage.getElementsByClass("productDataTable").first()
-                .getElementsByClass("row--text row--text  attributeName");
+                .getElementsByClass("ta-attribute-row");
     }
 
     private String getGameCategory(Document gamePage) {

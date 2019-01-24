@@ -98,8 +98,13 @@ public class Game {
     }
 
     public String getReleaseDate() {
-        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
-        return formatter.format(releaseDate);
+        try {
+            Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+            return formatter.format(releaseDate);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     public void setReleaseDate(String releaseDate) {
@@ -108,8 +113,9 @@ public class Game {
         try {
             date = dateFormat.parse(releaseDate);
             this.releaseDate = date;
-        } catch (ParseException e) {
+        } catch (ParseException | IllegalArgumentException e) {
             e.printStackTrace();
+            this.releaseDate = new Date();
         }
     }
 
@@ -124,7 +130,7 @@ public class Game {
 
     @Override
     public String toString() {
-        return id + ", " + name + ", " + categoryId + ", " + price + ", " + releaseDate + ", " + producerId + ", " + position + ", " + pegiCodeId  + ", " + imgUrl;
+        return id + ", " + name + ", " + categoryId + ", " + price + ", " + releaseDate + ", " + producerId + ", " + position + ", " + pegiCodeId + ", " + imgUrl;
     }
 
     @Override
